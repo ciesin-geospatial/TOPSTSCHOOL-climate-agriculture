@@ -1,4 +1,4 @@
-# The TOPS Training SCHOOL Porject
-## Module 5 Agriculture
+# The TOPS Training SCHOOL Project
+## Module 5 Climate & Agriculture
 
 Repository for the TOPS-T SCHOOL project
