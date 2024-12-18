@@ -1,5 +1,5 @@
 ---
-title: "Welcome SCHOOL Module 2: Climate and Agriculture"
+title: "Welcome SCHOOL Module 4: Climate and Agriculture"
 format: html
 ---
 
