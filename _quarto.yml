@@ -1,0 +1,50 @@
+project:
+  title: "SCHOOL Climate and Agriculture Module"
+  type: website
+  output-dir: docs
+format:
+  html:
+    embed-resources: true
+    theme: sandstone
+    css: "https://raw.githubusercontent.com/ciesin-geospatial/TOPSTSCHOOL/main/custom.scss"
+    toc: true
+    toc-title: Contents
+    toc-location: left
+    code-overflow: wrap
+code-block-bg: true
+code-block-border-left: "#315c86"
+keep-ipynb: true
+lightbox: true
+execute: 
+  warning: false
+website:
+  navbar:
+    background: primary
+    search: true
+    left:
+      - text: "Home"
+        url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/index.html
+      - text: "Lessons"
+        menu:
+          - text: "Lesson 1: NASA Acres and Climate Resilience Network"
+            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/NASA-Acres-Climate-Resilience-Network.html
+          - text: "Lesson 2: Exploring ICIS-AIR, TRI, SVI, and Health Outcomes"
+            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-air-quality/m202-svi-tri-icis-places.html
+          - text: "Lesson 3: EJScreen: Environmental Justice Screening and Mapping Tool"
+            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-air-quality/m203-ejscreen.html
+          - text: "Lesson 4: Measuring Particulate Matter in countires and socioeconomic strata"
+            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-air-quality/m204-grdiv1-pm25.html
+         
+    tools:
+      - icon: github
+        menu:
+          - text: Source Code
+            url:  https://github.com/ciesin-geospatial/TOPSTSCHOOL
+          - text: Report a Bug
+            url:  https://github.com/ciesin-geospatial/TOPSTSCHOOL/issues
+      - icon: globe
+        href: https://ciesin-geospatial.github.io/TOPSTSCHOOL/
+        text: "TOPSTSCHOOL GitHub Home Page"
+      - icon: youtube
+        href: https://www.youtube.com/channel/UCOIrczFd7_ht2bNUQ3qnM8w
+        text: "Youtube Channel"
