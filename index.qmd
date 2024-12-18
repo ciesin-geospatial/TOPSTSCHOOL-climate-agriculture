@@ -22,7 +22,7 @@ Teaching earth science topics and coding skills in depth is beyond the scope of 
 ## Module 4: Climate and Agriculture datasets and use cases cover:
 
 -   **NASA ACRES Climate Resilience Network:** This lesson will use public research data for derived conclusions and to view the impacts climate change has on agriculture.
-    -   [Lesson 1: Acquiring, Pre-Processing, and Visualizing Student-Monitored Data for New York City schools](https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m401-nasa-acres-climate-resilience-network.html)
+    -   [Lesson 1: NASA ACRES Climate Resilience Network](https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m401-nasa-acres-climate-resilience-network.html)
 
 
 ::: {style="text-align: right;"}
