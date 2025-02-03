@@ -1,672 +1,747 @@
 ---
 title: "NASA Acres and Climate Resilience Network"
-author: "Jacom Orser"
+author: "Jacom Almon Orser and Dr. Michael Humber"
 format: html
 bibliography: acres-references.bib
 ---
+# Primary Learning Objectives
+
+Technical Skills:
+
+1. Access and process satellite imagery using NASA's APPEARS platform
+2. Work with different spatial data formats and resolutions
+3. Perform raster analysis and visualization
+4. Calculate and interpret NDVI values from multispectral satellite data
+
+Analytical Skills:
+
+1. Compare vegetation health between areas affected and unaffected by saltwater intrusion
+2. Evaluate limitations and uncertainties in geospatial analysis
+
+
+## In this lesson you will:
+
+1. Understand the relationship between sealevel rise, salt water intrusion, and agricultural productivity in Maryland's coastal regions
+2. Learn to work with and analyze multiple types of geospatial data (raster datasets) using Python
+3. Interpret vegetation health patterns using satellite-derived NDVI measurements
+4. Evaluate potential future impacts of sea level rise on agricultural land
+
+This lesson will allow the learner to gain a deper understanding of the followinf concepts
+- Recognizing the economic importance of agriculture in Maryland
+- Understanding how sea level rise is impacting coastal farming
+- Identifying the role of remote sensing in monitoring environmental changes
+- Connecting local agricultural challenges to broader climate change impacts
+
+This module can help to contextualize the impact of saltwater inundation. For this module, we will identify cropland, and then, using the NOAA sea level rise estimations, we can calculate the difference in productivity using NDVI as a measure of vegetation health. A graphical time series allows us to see areas impacted by sea level rise.
+
+First, we can find the county-level statistics of harvestable acreage. We are using the Crop Data Layer (CDL) from the United States Department of Agriculture National Agriculture Statistics Service (USDA NASS)
+
+- Use API to call in the CDL dataset to map crop types.
+
+After getting familiar with the dataset, we can modify it. Because we are interested in the impact of sea level rise and the effect we can find that data from the National Oceanic and Atmospheric Administration
+
+- Access the Sea level rise (elevation dataset) to identify new areas of potential areas that are at risk of future flooding. Clip to county of interest
+- Compare the CDL with the SLR mask and without to identify the NOAA estimated loss of land.
+
+Then using Landsat create a time series for the Normalized Difference Vegetation Index (NDVI) of the masked cropland, derive insights about trends in NDVI.
+    
+- Use NDVI to create a time series looking back in time at areas that have experienced flooding to visualize the movement from productive farms to moderate quality.
+
+This all together would allow us to make a predictive analysis for Maryland in the future under the projections of sea level rise. Given the current conditions, subtracting the sea level rise inundated areas.
+
+The data story we have derived concerns sea level rise in Maryland and its impact on production levels within the state. This module can help students draw from multiple data sources and derive insights using historical and future viewing data sets.
+
+We can prompt the user to think about future impacts outside the direct sea level rise projections, allowing them to include a full picture and finally using that picture to identify economic impacts that action or inaction causes. This begs the question: What can the public do to enact changes rather than putting pressure on farmers to change?
+
 
 # Introduction
 
+Created by [NASA Acres](https://www.nasaacres.org/), this module was built to promote the research that has been done. If you want to explore more about the data collected, [explore the dashboard](https://climate.umd.edu/climate-smart-dashboard/). And provide the public with the knowledge, know-how, and ability to use and understand this data. With the help of [TOPST SCHOOL](https://ciesin-geospatial.github.io/TOPSTSCHOOL/), this data discovery process walks through each data source, identifying the limitations of research and spatial data and exploring, as George Box says, "all models are wrong, some are useful."
+
+## NASA Acres
+
+[NASA Acres](https://www.nasaacres.org/) is NASA’s consortium focused on agriculture and food security in the United States.
+
+![](https://images.squarespace-cdn.com/content/v1/6376910a05a7a254908d0ee7/62ee6d54-95fc-4e05-a7a3-106a2980417d/NASA+Acres+RDE+Partner+Map.png)[^1]
+
+[^1]: Credit: NASA Acres
+
+NASA Acres brings together actors throughout the agricultural community to share methods, data, and technology to work towards a richer knowledge about past and present agricultural land use, productivity, and sustainability in the U.S. The mission is also to create a stronger agricultural technology workforce ready to tackle the challenges of climate change and global hazards to U.S. agriculture and food security.
+
+NASA Acres has defined the **Essential Agricultural Variables (EAVs)** to address this problem. These were designed by NASA Acres to define the capabilities of the top satellite data scientists and practitioners who make up NASA Acres Research, Development, and Extension partners, and the needs of decision-making-collaborators already in our network, to identify an initial set of focus.
+
+- Cropland and Crop Type Mapping
+
+- Crop and Crop Type Area Estimation
+
+This can help us determine the changes in the cropland. As things change, we can tell how much and what is actually changing because we have mapped and studied this area. The need for accurate, consistent study within these areas of agriculture is vital for describing changes as they occur.
+
+### What is Remote Sensing?
+
+Remote sensing is the action of measuring the reflectance of energy from objects. For this module we are using Landsat, a passive satellite that relies on the sun to send out energy and the sensor measures the reflectance.
+
+![](images/landsat.png)
+
+From this, we can use both the visible (red, green, blue) reflectance and the infrared light to detect objects on the ground.
+
+This is an example of a Landsat image. Compared to the aerial image, the Landsat image appears pixelated. This is because Landsat takes all the reflectances within each 30 by 30-meter square in the ground to get one value.
+
+![](images/remote_sensing.png)
+
+Generate the pull for the NDVI data. This data pull comes from The Application for Extracting and Exploring Analysis Ready Samples ([AppEEARS](https://appeears.earthdatacloud.nasa.gov/)), which offers a simple and efficient way to access data archives. We will use Landsat for this module, but a variety of datasets are available.
+
+![](images/ndvi_landsat.png)
+
+NDVI is a commonly used calculation as an indicator for the health of vegetation based on the ratio of reflectance of red to near-infrared values within the electromagnetic spectrum. If you want to learn [more](https://gisgeography.com/ndvi-normalized-difference-vegetation-index/).
+
+## WHY AGRICULTURE?
+
+According to the United States Department of Agriculture (USDA) in 2023 farming operations in Maryland (MD) were an estimated 2,000,000 acres. For grain corn in MD, in 2023, 440,000 acres were harvested. The total commercial value for all corn in the state was $355,740,000.
+
+Food is a vital resource for direct and indirect consumption. However, as salt water intrudes into agricultural land, the impacts and consequences are just beginning to be felt.
+
+As researchers, we must come to the same understanding of what is important in order to understand why we are studying agriculture.
+
 ## CLIMATE SMART AGRICULTURE IN MARYLAND
 
-A regional view of the past with applications to the present. Python spatial and tabular analysis using multiple variables to look at a single time slice. This code can be a combination of cloud and local based analysis. A purpose for this exercise is to use public research data for derived conclusions, view the impacts climate change has on agriculture, and look at what farmers can do and why we need to support them.
+Why is agriculture important in Maryland and what is salt water intrusion?
 
-NASA Acres has defined the **Essential Agricultural Variables (EAVs)**. These were designed by NASA Acres to define the capabilities of the top satellite data scientists and practitioners who make up NASA Acres Research, Development, and Extension partners, and the needs of decision-making-collaborators already in our network, to identify an initial set of focus.
+Researchers found that salt was intruding on coastal agricultural areas.
 
-1.  Cropland and Crop Type Mapping
+Saltwater impacted coastal farming on a broad scale. Although there was some debate around the area lost, estimates put land losses between 8,000 to 140,000 ha of surface inundation [@Mondal2023; @taylor2020].
 
-2.  Crop and Crop Type Area Estimation
+![](https://www.mdsg.umd.edu/sites/default/files/styles/large/public/inline-images/twMedoe0cTsekaPlBkBY7cBimieC96uQTzqQjs0r8wYOv6D4Jr.png)[^2]
 
-Derived results will be the county level statistics of impacts of harvestable acreage. To achieve this, a basic workflow we can
+[^2]: Photo courtesy of Jarrod Miller
 
-1.  Use api to call in the CDL dataset to map crop types.
+Researchers use satellite remote sensing to develop machine learning models built on ground-truthed data to identify salt patches in the mid-Atlantic region of the US.
 
-Then
+The U.S. Mid-Atlantic has seen higher rates of sea level rise, marshes may be especially vulnerable. “In the Chesapeake Bay, sea level rise has already contributed to the degradation of over 80,000 ha (70%) of tidal marsh” [@taylor2020]. This view can help us understand the impacts of small sea level rise on land.
 
-1.  Access the Sea level rise (elevation dataset) to identify new areas of potential areas that are at risk of future flooding. Clip to county of interest
 
-2.  Compare the CDL with the SLR mask and with out to identify the NOAA estimated loss of land.
+### Saltwater Intrusion
+To understand more about saltwater intrusion in Maryland, run this code and watch the video that explains the causes and effects.
+{{< video https://youtu.be/_J8joidx2qE >}}
 
-Then using MODIS create a time series for NDVI of the masked crop land, derive insights about trends in NDVI
+Learn more about saltwater inundation from the National Oceanic and Atmospheric Administration program titled [Coastal Farming Challenges: Flooding, Salt, and Land Loss](https://www.mdsg.umd.edu/coastal-climate-resilience/farming-flooding-salt-land-loss#:~:text=Farmers%20and%20woodlot%20owners%20in%20Maryland%20and%20Virginia%20are%20facing,under%20saltier%20or%20wetter%20conditions).
 
-1.  Use NDVI to create a time series looking backwards in time at areas that have experienced flooding to visualize the moving from productive farms to moderate quality.
+Below is a simplified illustration of saltwater intrusion:
 
-This all together would allow us to make a predictive analysis for Maryland in the future under the projections of sea level rise. Given the current conditions, subtracting the sea level rise inundated areas. Then given the remaining areas, making predictions about the trends of NDVI given the trends in historical areas that are near impacted areas. We cannot say that "sea level rise is driving the decrease" because there are many other factor and decisions that farmers make around how much to plant, how much to harvest, chemicals applied, growing degree days, soil and soil moisture conditions. But this module should provide the ability to make insights about potential causes and impacts.
+![](images/Simplified_salt.png)[^2]
 
-The data story that we have derived is about sea level rise in Maryland and the impact that it has on the production levels with in the state. From this module, we can provide students with the ability to draw from multiple data sources, as well as derive insights using historical and future viewing data sets.
+[^2]: Courtesy of the authors
 
-The U.S. Mid-Atlantic has seen higher rates of sea level rise, marshes may be especially vulnerable. "In the Chesapeake Bay, sea level rise has already contributed to the degradation of over 80,000 ha (70%) of tidal marsh" [@taylor2020]. This view can help us to understand the impacts that small levels of sea level rise have on land.
 
-We can prompt the user to think about future impacts outside the direct sea level rise projections, allowing them to include a more full picture, and finally using that picture to identify economic impacts that action or inaction causes. This begs the question, what can the public do to enact changes, rather than putting the pressure on farmers to change?
+# Data Processing Tools
 
-```{python}
-!pip install arcgis arcgis-mapping rasterio earthaccess
-```
+The primary tool we are using is Python. Python is used to take large quantities of data and help users define and derive stories from that data. The installation depends on the method you are using. For Google Colab, you must install rasterio (a substantial raster library) and import the following libraries.
 
 ```{python}
-#import the required packages
+# Use pip to install the Raster library
+# !pip install rasterio
+## importing libraries
+# Extends pandas for working with geometric/geographic data, handling spatial operations and file formats like shapefiles
 import geopandas as gpd
+
+# Handles reading, writing, and processing of geospatial raster data (like satellite imagery or elevation data)
 import rasterio
-import numpy as np
+
+# Fundamental package for scientific computing in Python, provides support for large multi-dimensional arrays and matrices
+import numpy as np  # Note: This is imported twice in your list
+
+# Data manipulation and analysis library, particularly good for structured data in DataFrames
 import pandas as pd
-import matplotlib.pyplot as plt
-from shapely.geometry import box
-import numpy as np
+
+# Plotting library for creating static, animated, and interactive visualizations
+import matplotlib.pyplot as plt  # Note: This is imported twice in your list
+
+# Library for making HTTP requests to web services and APIs
 import requests
+
+# API for parsing and creating XML data
 import xml.etree.ElementTree as ET
-import matplotlib.pyplot as plt
+
+# Handles binary I/O objects
 from io import BytesIO
+
+# Provides functions for interacting with the operating system
 import os
-from rasterio.warp import calculate_default_transform, reproject, Resampling
+
+# Specific tools for transforming and reprojecting raster data
+from rasterio.warp import calculate_default_transform, reproject, Resampling, transform_bounds
+
+# Basic date and time types, useful for handling temporal data
 from datetime import datetime, timedelta
 
+# Creates interactive web maps
+import folium
+
+#  Adds raster layers (e.g., satellite images) to Folium maps
+from folium import raster_layers
+
+# Display graphical interfaces
+from IPython.display import display
 ```
 
-```{python}
-#define fuctions
+The base data that we are going to use for this module is Landsat 30 by 30 meter, 16 day highest quality NDVI value. To gather this data you must have a [Earth Data](https://urs.earthdata.nasa.gov/) login.
 
-def reproject_raster(src_dataset, src_crs, src_transform, dst_crs='EPSG:4326'):
-    dst_crs = rasterio.crs.CRS.from_string(dst_crs)
-    dst_transform, dst_width, dst_height = calculate_default_transform(
-        src_crs, dst_crs,
-        src_dataset.width, src_dataset.height,
-        *src_dataset.bounds)
-    dst_kwargs = src_dataset.meta.copy()
-    dst_kwargs.update({
-        'crs': dst_crs,
-        'transform': dst_transform,
-        'width': dst_width,
-        'height': dst_height})
-    dst_data = np.zeros((src_dataset.count, dst_height, dst_width), dtype=src_dataset.dtypes[0])
-    for i in range(1, src_dataset.count + 1):
-        reproject(
-            source=rasterio.band(src_dataset, i),
-            destination=dst_data[i-1],
-            src_transform=src_transform,
-            src_crs=src_crs,
-            dst_transform=dst_transform,
-            dst_crs=dst_crs,
-            resampling=Resampling.nearest)
-    return dst_data, dst_kwargs
+## INTRODUCTORY CODE
 
-def format_cdl_url(fips,year):
-    base_url = "https://nassgeodata.gmu.edu/axis2/services/CDLService/GetCDLFile"
-    url = f"{base_url}?year={year}&fips={fips}"
-    return url
+### Accessing Data
 
-def get_srl_raster():
-    slr_path = 'data/MD_East_slr_depth_3_5ft.tif'
-    with rasterio.open(slr_path) as slr_raster:
-            slr_meta = slr_raster.meta
-            slr_meta['nodata'] = 0
-            slr_reprojected, slr_meta_reprojected = reproject_raster(src_dataset=slr_raster, src_crs=slr_meta['crs'], src_transform=slr_meta['transform'])
-    return slr_reprojected, slr_meta_reprojected
-```
-
-# CDL 
-
-To understand the nature of Maryland agriculture we can begin by using the CDL. This raster dataset comes at a 30 meter spatial resolution. We can access this data through their api. The current configuration allows data to be pulled at the county level.
-
-COUNTY LEVEL CDL FOR FIPS <https://nassgeodata.gmu.edu/axis2/services/CDLService/GetCDLFile>
-
-This view provides insight into the common commodities that are grown in Maryland in the desired year.
+NASA Earth data requires a data pull request, this takes time to 'order', we can run this now to give the program time to gather the data we are requesting. **This code chunk is used for local downloads if you have not yet downloaded data**:
 
 ```{python}
+## NASA Earth Data username and password
+USERNAME = "jfmartinez4" ## ENTER HERE
+PASSWORD = "Cafeconpan12!" ## ENTER HERE
 
-crop_mapping = {
-  0: "Background", 1: "Corn", 2: "Cotton", 3: "Rice", 
-  4: "Sorghum", 5: "Soybeans", 6: "Sunflower", 10: "Peanuts",
-  11: "Tobacco", 12: "Sweet Corn", 13: "Pop or Orn Corn", 
-  14: "Mint", 21: "Barley", 22: "Durum Wheat",23: "Spring Wheat", 
-  24: "Winter Wheat", 25: "Other Small Grains", 26: "Dbl Crop WinWht/Soybeans", 
-  27: "Rye", 28: "Oats", 29: "Millet", 30: "Speltz", 31: "Canola", 
-  32: "Flaxseed", 33: "Safflower", 34: "Rape Seed",35: "Mustard", 
-  36: "Alfalfa", 37: "Other Hay/Non Alfalfa", 38: "Camelina", 39: "Buckwheat", 
-  41: "Sugarbeets", 42: "Dry Beans", 43: "Potatoes", 44: "Other Crops", 
-  45: "Sugarcane", 46: "Sweet Potatoes", 47: "Misc Vegs & Fruits",
-  48: "Watermelons", 49: "Onions", 50: "Cucumbers", 51: "Chick Peas", 
-  52: "Lentils", 53: "Peas", 54: "Tomatoes", 55: "Caneberries", 56: "Hops", 
-  57: "Herbs", 58: "Clover/Wildflowers", 59: "Sod/Grass Seed", 60: "Switchgrass",
-  61: "Fallow/Idle Cropland", 63: "Forest", 64: "Shrubland", 65: "Barren", 
-  66: "Cherries", 67: "Peaches", 68: "Apples", 69: "Grapes", 
-  70: "Christmas Trees",  71: "Other Tree Crops", 72: "Citrus", 74: "Pecans",
-  75: "Almonds", 76: "Walnuts", 77: "Pears", 81: "Clouds/No Data", 
-  82: "Developed", 83: "Water", 87: "Wetlands", 88: "Nonag/Undefined", 
-  92: "Aquaculture", 111: "Open Water", 112: "Perennial Ice/Snow", 
-  121: "Developed/Open Space",122: "Developed/Low Intensity",
-  123: "Developed/Med Intensity", 124: "Developed/High Intensity", 
-  131: "Barren", 141: "Deciduous Forest", 142: "Evergreen Forest", 
-  143: "Mixed Forest", 152: "Shrubland", 176: "Grass/Pasture",
-  190: "Woody Wetlands", 195: "Herbaceous Wetlands", 204: "Pistachios", 
-  205: "Triticale", 206: "Carrots", 207: "Asparagus", 208: "Garlic", 
-  209: "Cantaloupes", 210: "Prunes", 211: "Olives", 212: "Oranges",
-  213: "Honeydew Melons", 214: "Broccoli", 215: "Avocados", 216: "Peppers", 
-  217: "Pomegranates", 218: "Nectarines", 219: "Greens", 220: "Plums", 
-  221: "Strawberries", 222: "Squash", 223: "Apricots", 224: "Vetch",
-  225: "Dbl Crop WinWht/Corn", 226: "Dbl Crop Oats/Corn", 227: "Lettuce", 
-  228: "Dbl Crop Triticale/Corn", 229: "Pumpkins", 
-  230: "Dbl Crop Lettuce/Durum Wht", 231: "Dbl Crop Lettuce/Cantaloupe", 
-  232: "Dbl Crop Lettuce/Cotton",233: "Dbl Crop Lettuce/Barley", 
-  234: "Dbl Crop Durum Wht/Sorghum", 235: "Dbl Crop Barley/Sorghum", 
-  236: "Dbl Crop WinWht/Sorghum", 237: "Dbl Crop Barley/Corn", 
-  238: "Dbl Crop WinWht/Cotton",239: "Dbl Crop Soybeans/Cotton", 
-  240: "Dbl Crop Soybeans/Oats", 241: "Dbl Crop Corn/Soybeans", 
-  242: "Blueberries", 243: "Cabbage", 244: "Cauliflower", 245: "Celery", 
-  246: "Radishes", 247: "Turnips", 248: "Eggplants",249: "Gourds", 
-  250: "Cranberries", 254: "Dbl Crop Barley/Soybeans", 255: ""
-  }
+## The submit the Landsat tiles, we have provided you with the geojson file of Talbot County.
+## If you wish to use another county, download, and path to the other county geojson file
+county_path = 'data/Talbot_County.geojson' # Path to county
 
 ```
 
 ```{python}
+# Conversion to geopandas data frame
+county_data =  gpd.read_file(county_path)
+ # Reproject the county_data to landsat
+county_reprojected = county_data.to_crs('EPSG:4326')
 
-county = 'Talbot'
-code = "24041"
-year = 2018
-
+year = 2018 # Year of interest
 ```
 
 ```{python}
-service_url = format_cdl_url(code, year)
-response = requests.get(service_url)
+# Get the token from your Earth Data account
+token = requests.post('https://appeears.earthdatacloud.nasa.gov/api/login',auth=(USERNAME, PASSWORD)).json()['token']
+```
+```{python}
+task = {'task_type': 'area',
+          'task_name': 'Talbot_County',
+          'params': {
+                    'dates': [{'startDate':  f'06-01-{year}' , 'endDate': f'09-30-{year}'}],# Set the start and end dates for summer sections
+                    'layers': [{'layer': 'SR_B4', 'product':'L08.002'},
+                               {'layer': 'SR_B5', 'product':'L08.002'}], # Data of interest is the NDVI values
+                    'geo': { #The geo field should contain the geoJSON, currently it is in a set
+                        'type': 'FeatureCollection',
+                        'features': [{
+                            'type': 'Feature',
+                            'properties': {},
+                            'geometry': county_reprojected.geometry.iloc[0].__geo_interface__ #Extracting the geometry from the GeoPandas DataFrame as a GeoJSON-compatible dictionary
+                        }]
+                    },
+                    "output": {"format": {"type": "geotiff"},
+                              "projection": "native"}}}
+
+task_id = requests.post('https://appeears.earthdatacloud.nasa.gov/api/task',json=task,headers={'Authorization': f'Bearer {token}'}).json()
+```
+
+You should receive an email from APPEEARS that says the task has started.
+
+
+## Working with Rasters
+
+### Reading Raster Data
+
+There are two ways to display information: vectors (points, lines, polygons) or rasters. Rasters are continuous sheets that are layered across a space; they are made up of pixels. Each pixel represents the ground beneath it. For example, if a raster pixel is 30 by 30 meters, that means a single pixel represents 30 by 30 meters on the ground.
+
+```{python}
+fips = "24041" # County code for all US counties, remember we called this in the first code chunk when we used the geojson to gather Landsat NDVI images
+year = 2018 # Year of interest
+
+# The CDL (crop data layer) is the authoritative data layer for the US crops
+base_url = "https://nassgeodata.gmu.edu/axis2/services/CDLService/GetCDLFile"
+
+# Pulling the data from the online source using the requests library allows us to access the data without needing to download the dataset
+response = requests.get(f"{base_url}?year={year}&fips={fips}")
+print(response.content)
 root = ET.fromstring(response.content)
 tif_url = root.find('.//returnURL').text
 cdl_data = rasterio.open(tif_url)
 cdl_meta = cdl_data.meta
-cdl_reprojected, cdl_meta_reprojected = reproject_raster(src_dataset=cdl_data, src_crs=cdl_meta['crs'], src_transform=cdl_meta['transform'])
-
+data = cdl_data.read(1)
 ```
 
-The eastern seaboard has seen changes in the sea level along with increase flooding and the decrease in predictability of water flow from rivers. This daa comes from NOAA (learn more here <https://coast.noaa.gov/data/digitalcoast/pdf/slr-inundation-methods.pdf>)
-
-This raster is the projection of inudated areas by the year of 2050. Data access can be found here <https://coast.noaa.gov/slrdata/Depth_Rasters/MD/index.html>
+### Displaying Raster Data
+MISSING TEXT
 
 ```{python}
-slr_reprojected, slr_meta_reprojected = get_srl_raster()
+bounds = transform_bounds(cdl_data.crs, 'EPSG:4326', *cdl_data.bounds)
 
+# Calculate the center of the image for the map
+center_lat = (bounds[1] + bounds[3]) / 2
+center_lon = (bounds[0] + bounds[2]) / 2
+
+# Create a base map centered on the image
+m = folium.Map(location=[center_lat, center_lon], zoom_start=10)
+
+# Add the raster layer to the map
+img = folium.raster_layers.ImageOverlay(
+    data,
+    bounds=[[bounds[1], bounds[0]], [bounds[3], bounds[2]]],
+
+)
+img.add_to(m)
+
+# Add the colormap to the map
+
+# Add layer control
+folium.LayerControl().add_to(m)
+display(m)
 ```
 
-# Gather NDVI values
+ Zoom around in on the map. Look at the raster structure, the squares stacked next to each other, representing an area on the ground.
+
+### Spatially Project Raster Data
+
+When working with geographic data, we have to begin by knowing that all of our data is in the right space on the globe. We begin with a function for reprojecting rasters. This is one of the keys when working with spatial data: ensuring that all of the data is based on the same spatial reference.
+
+Reprojecting requires a resampling method; for this, we use the nearest neighbor's resampling.
+
+![](images/nearest_neighbor.png)
 
 ```{python}
-def get_appeears_token(username, password):
+def reproject_raster(src_dataset, src_crs, src_transform, dst_crs):
+    # Convert the destination CRS string into a CRS object that rasterio can use
+    # For example, 'EPSG:4326' becomes a python coordinate object
+    dst_crs = rasterio.crs.CRS.from_string(dst_crs)
 
-    response = requests.post('https://appeears.earthdatacloud.nasa.gov/api/login',auth=(username, password))
+    # Calculate the new dimensions and transformation matrix for the output raster
+    # This ensures the whole image fits in the new coordinate system
+    dst_transform, dst_width, dst_height = calculate_default_transform(
+        src_crs,                    # Current coordinate system
+        dst_crs,                    # Target coordinate system
+        src_dataset.width,          # Current image width
+        src_dataset.height,         # Current image height
+        *src_dataset.bounds         # The geographical bounds of the image
+    )
 
-    return response.json()['token']
+    # Copy the metadata from the source dataset
+    # This includes things like data type, number of bands, etc.
+    dst_kwargs = src_dataset.meta.copy()
 
-def submit_appeears_task(token, task):
-
-    response = requests.post('https://appeears.earthdatacloud.nasa.gov/api/task',json=task,headers={'Authorization': f'Bearer {token}'})
-
-    return response.json()['task_id']
-
-def get_appeears_bundle(token, task_id):
-
-    response = requests.get(f'https://appeears.earthdatacloud.nasa.gov/api/bundle/{task_id}',headers={'Authorization': f'Bearer {token}'})
-
-    return response.json()
-
-def load_county_data():
-
-    sea_level_path = 'data/Talbot_County.geojson'
-
-    sea_level_gdf = gpd.read_file(sea_level_path)
-
-    return sea_level_gdf
-
-def day_of_year_to_date2(day_of_year_str):
-
-    year = int(day_of_year_str[:4])
-
-    day_of_year = int(day_of_year_str[4:])
-
-    start_date = datetime(year, 1, 1)
-
-    target_date = start_date + timedelta(days=day_of_year - 1)
-
-    return target_date.strftime('%m-%d-%Y')
-
-def resample_using_cdl(data, data_meta, cdl_meta_reprojected):
-
-    resampled_data = np.zeros(
-
-        (data.shape[0], cdl_meta_reprojected['height'],
-        cdl_meta_reprojected['width']),
-
-        dtype=data.dtype 
-        )
-
-    for i in range(data.shape[0]):
-
-        reproject(
-
-            source=data[i],
-
-            destination=resampled_data[i],
-
-            src_transform=data_meta['transform'],
-
-            src_crs=data_meta['crs'],
-
-            dst_transform=cdl_meta_reprojected['transform'],
-
-            dst_crs=cdl_meta_reprojected['crs'],
-
-            resampling=Resampling.bilinear
-
-        )
-    updated_meta = data_meta.copy()
-
-    updated_meta.update({
-
-        'transform': cdl_meta_reprojected['transform'],
-
-        'width': cdl_meta_reprojected['width'],
-
-        'height': cdl_meta_reprojected['height'],
-
-        'crs': cdl_meta_reprojected['crs']
-
+    # Update the metadata with the new CRS, transform, width, and height
+    dst_kwargs.update({
+        'crs': dst_crs,
+        'transform': dst_transform,
+        'width': dst_width,
+        'height': dst_height
     })
 
-    return resampled_data, updated_meta
-```
+    # Create an empty array to store the reprojected data
+    # Shape is (number of bands, new height, new width)
+    dst_data = np.zeros((src_dataset.count, dst_height, dst_width),
+                       dtype=src_dataset.dtypes[0])
+    reproject(
+        source=rasterio.band(src_dataset,1),
+        destination=dst_data,             # Where to store the result
+        src_transform=src_transform,           # Current transformation
+        src_crs=src_crs,                      # Current coordinate system
+        dst_transform=dst_transform,           # New transformation
+        dst_crs=dst_crs,                      # New coordinate system
+        resampling=Resampling.nearest         # Use nearest neighbor resampling
+    )
 
-```{python}
-county_data = load_county_data()
-
-county_reprojected = county_data.to_crs('EPSG:4326')
-
-us = county_reprojected.geometry.iloc[0]
-
-minx, miny, maxx, maxy = us.bounds
-```
-
-```{python}
-bbox = [[maxx, miny],
-
-        [maxx, maxy],
-
-        [minx, maxy],
-
-        [minx, maxy],
-
-        [minx, miny]]
-```
-
-```{python}
-start = f'06-01-{year}'
-
-end = f'09-30-{year}'
-
-```
-
-```{python}
-products = [{'layer': '_250m_16_days_NDVI', 'product':'MOD13Q1.061'}]
-
-
-
+    # Return both the reprojected data and the updated metadata
+    return dst_data, dst_kwargs
 ```
 
 
-```{python}
-USERNAME = 'USERNAME'
-PASSWORD = 'PASSWORD'
 
+### Access data with API
+
+To understand the nature of Maryland agriculture we can begin by using the CDL. This raster dataset comes at a 30-meter spatial resolution. We can access this data through their API. The current configuration allows data to be pulled at the county level.
+
+[COUNTY LEVEL CDL FOR FIPS](https://nassgeodata.gmu.edu/axis2/services/CDLService/GetCDLFile)
+
+This view provides insight into the common commodities that are grown in Maryland in the desired year.
+
+```{python}
+cdl_reprojected, cdl_meta_reprojected = reproject_raster(cdl_data, cdl_meta['crs'], cdl_meta['transform'], 'EPSG:4326')
+```
+
+
+The eastern seaboard has seen changes in the sea level along with increased flooding and the decrease in the predictability of water flow from rivers. This data comes from [NOAA](https://coast.noaa.gov/data/digitalcoast/pdf/slr-inundation-methods.pdf), this raster is the projection of inundated areas by the year 2050. Data access can be found [here](https://coast.noaa.gov/slrdata/Depth_Rasters/MD/index.html).
+
+```{python}
+# Path to the stored sea level rise tif file
+slr_path = 'data/MD_East_slr_depth_3_5ft.tif'
+
+# This allows us to open the raster file, then reproject and close the original file so we are not storing duplicates of the raster
+with rasterio.open(slr_path) as slr_raster:
+    slr_meta = slr_raster.meta.copy()
+    slr_meta['nodata'] = 0
+
+    # Reproject
+    slr_reprojected, slr_meta_reprojected = reproject_raster(
+        slr_raster,
+        slr_meta['crs'],
+        slr_meta['transform'],
+        'EPSG:4326')
+```
+
+### Working with NASA APPEEARS Data
+
+You should have received an email from APPEEARS letting you know your task has completed. If you have not received this, go to the APPEEARS website to view the progress by clicking on the explore tab and viewing the TALBOT_COUNTY request.
+
+```{python}
+## NASA hosts their Landsat data in their program called APPEEARS
+# To access the data you must probe it from cold storage, that was the initial code we ran
+# If you wish to learn more, visit the API documentation from appeears
+def doy_2_date(day_of_year_str): # This function changes the DOY value to a more easily readable format (from Julian day of the year to date based on month day year)
+              year = int(day_of_year_str[:4]) # year string to integer
+              day_of_year = int(day_of_year_str[4:]) # Julian day string to integer
+              start_date = datetime(year, 1, 1) # using datetime to change year to first day first month of the year of interest
+              target_date = start_date + timedelta(days=day_of_year - 1) # add the DOY of acquisition to the year
+              return target_date.strftime('%m-%d-%Y') ## return proper formatting
 ```
 
 ```{python}
-#| eval: true
-#| echo: false
-
-USERNAME = 'jfmartinez4'
-PASSWORD = 'Potatoaway1!'
-```
-```{python}
-token = get_appeears_token(f'{USERNAME}', f'{PASSWORD}')
-```
-
-```{python}
-task = {
-  'task_type': 'area',
-  
-  'task_name': 'MODIS',
-  
-  'params': {
-    "geo": {
-      "type": "FeatureCollection", 
-      "features": [{
-        "type": "Feature",
-        "geometry": {
-          "type": "MultiPolygon",
-          "coordinates": [[bbox]]},
-        "properties": {}}],
-      "fileName": "Polygon"},
-      
-  'dates': [{
-    'startDate': start, 'endDate': end}],
-    
-  'layers': products,
-  
-  'coordinates': bbox,
-  
-  "output": {
-    "format": {
-      "type": "geotiff"},
-    "projection": "native"}
-    
-  }}
-
-```
-
-```{python}
-task_id = submit_appeears_task(token, task)
-```
-```{python}
-#| eval: true
-#| echo: false
-
-task_id = 'd09681c4-2da0-4513-a721-a041285438bf'
-```
-
-```{python}
-bundle = get_appeears_bundle(token, task_id)
+bundle = requests.get(f'https://appeears.earthdatacloud.nasa.gov/api/bundle/{task_id["task_id"]}',headers={'Authorization': f'Bearer {token}'}).json()
+QA_data = {}
+data = {} # Create an empty dictionary to collect the data from appeears
 bundle
 ```
+
 ```{python}
-data = {}
 
-for file in bundle['files']:
+# Load the JSON file with pre-downloaded bundle data
+with open("data/Talbot_County.geojson", "r") as f:
+    bundle = json.load(f)
 
-    file_id = file['file_id']
+```
+```{python}
 
-    if 'NDVI' in file['file_name']:
-
-      if '_doy' in file['file_name']:
-
-          datesy = file['file_name'].split('_doy')[1][:7]
-
-          doy = day_of_year_to_date2(datesy)
-
-          print(file['file_name'])
-
+for file in bundle['files']: # loops through each Landsat tile that we called.
+    file_id = file['file_id'] # store the name of the tile
+    if '_doy' in file['file_name']: # doy is the day of the year, ordering the dictionary by doy allows for easier access later
+      # This allows us to get just the files of interest. We only want the
+      if "SR_B4" in file['file_name'] or "SR_B5" in file['file_name'] or "QA_PIXEL_C" in file['file_name']:
+          datesy = file['file_name'].split('_doy')[1][:7] # seperation of doy values
+          doy = doy_2_date(datesy) # calling the function (from Julian day (001 is the first day of the year, 365 is the last day of the year) to mm-dd-yyyy
+          band = file['file_name'].split('/L08.002_')[1][:5]
       else:
-
           continue
-
+      # access the NDVI data via request library
       file_download = requests.get(
-
-          'https://appeears.earthdatacloud.nasa.gov/api/bundle/{0}/{1}'.format(task_id, file_id),
-
+          'https://appeears.earthdatacloud.nasa.gov/api/bundle/{0}/{1}'.format(task_id['task_id'], file_id),
           headers={'Authorization': 'Bearer {0}'.format(token)},
-
           allow_redirects=True,
-
           stream=True)
-
+      # Get the status of the file
       file_download.raise_for_status()
-
+      # This error warning allows for continuation even if there is an error
       if not file_download.content:
-
-          print(f"Warning: Empty file downloaded for {file['file_name']}")
-
+          print(f"Warning: Empty file downloaded for {file['file_name']}") # print warning message if there is an error, continue to next data set otherwise
           continue
-
-      file_content = BytesIO(file_download.content)
-
-      with rasterio.open(file_content) as src_initial:
-
-          src = src_initial.read(1, masked=True)
-
-          src_meta = src_initial.meta
-
-          dst_crs = cdl_data.crs
-
+      file_content = BytesIO(file_download.content) # format the downloaded content
+      with rasterio.open(file_content) as src_initial: # open the accessed raster
+          src = src_initial.read(1, masked=True) # read in the layer data
+          src_meta = src_initial.meta # access the metadata
+          dst_crs = 'EPSG:4326' # define the crs
           transform, width, height = calculate_default_transform(
-
               src_meta['crs'], dst_crs, src.shape[1], src.shape[0], *src_initial.bounds)
-
           kwargs = src_meta.copy()
-
+          # collect the current meta data information
           kwargs.update({
-
               'crs': dst_crs,
-
               'transform': transform,
-
               'width': width,
-
               'height': height
-
           })
 
           dst = np.zeros((height, width), dtype=src_meta['dtype'])
-
+          # Begin the reprojection process based on earlier defined projections of interest
           reproject(
-
               source=src,
-
               destination=dst,
-
               src_transform=src_meta['transform'],
-
               src_crs=src_meta['crs'],
-
               dst_transform=transform,
-
               dst_crs=dst_crs,
-
               resampling=Resampling.nearest)
 
+          # update the data (if no data set to 0)
           kwargs.update({'nodata': 0})
-
-          key = 'MODIS_NDVI'
-
+          # name the data
+          key = f'{band}'
           if key not in data:
-
+              # if first dataset, append the metadata to the entire dictionary
               data[key] = {'data': [], 'meta': kwargs, 'doy': []}
-
+          # stack the data and data
           data[key]['data'].append(dst)
-
           data[key]['doy'].append(doy)
 
     else:
-
       continue
 
+# name the stacked data, day, and metadata to be referenced later
+nir = np.stack(data['SR_B5']['data']) / 100
+red = np.stack(data['SR_B4']['data']) / 100
+qa_flags = np.stack(data['QA_PI']['data'])
+day = np.stack(data['SR_B5']['doy'])
+meta_nir = data['SR_B5']['meta']
+meta_red = data['SR_B4']['meta']
+
+ndvi = np.where((nir + red) != 0, (nir - red) / (nir + red), 0)
 ```
 
+Now that we have an NDVI dataset for each date, we have to filter out the cloudy or otherwise poor-quality NDVI values.
+
+![](images/PixelQA.png)
+
 ```{python}
-ndvi = np.stack(data['MODIS_NDVI']['data']) / 100
-
-day = np.stack(data['MODIS_NDVI']['doy'])
-
-meta = data['MODIS_NDVI']['meta']
-
+qa_flags_to_mask = [21824, 21890, 21952, 22018, 22146, 22208] ## These are the values that indicate the higher quality of pixel
+masked_ndvi = np.where(np.isin(qa_flags, qa_flags_to_mask), np.nan, ndvi) # filter the NDVI array
 ```
 
-## Combine and compare the results
 
 ```{python}
-ndvi_resampled, ndvi_resampled_meta = resample_using_cdl(ndvi, meta, cdl_meta_reprojected)
+## This function resamples the data to the same
+# Because the NDVI is 30 by 30-meters, the CDL data is at 30 by 30-meter resolution, and the SLR is less than 10 by 10-meter resolution
+# Resampling to the same spatial scale allows for analysis on the same spatial scale
+def resample_data(data, data_meta, to_reproject, method):
+    # collect the metadata from the CDL dataset
+    resampled_data = np.zeros(
+        (data.shape[0], to_reproject['height'], to_reproject['width']),
+        dtype=data.dtype
+    )
+    # collect the metadata from the target dataset
+    for i in range(data.shape[0]): # Because the NDVI stack has multiple dates, we have to loop through the stacked data
+        reproject(
+            source=data[i],
+            destination=resampled_data[i],
+            src_transform=data_meta['transform'],
+            src_crs=data_meta['crs'],
+            dst_transform=to_reproject['transform'],
+            dst_crs=to_reproject['crs'],
+            resampling=method # method of resampling - either nearest neightbor or bilinear (average of 4 closest neighbors)
+        )
+    # update the target dataset to the CDL dataset height and width
+    updated_meta = data_meta.copy()
+    updated_meta.update({
+        'transform': to_reproject['transform'],
+        'width': to_reproject['width'],
+        'height': to_reproject['height'],
+        'crs': to_reproject['crs']
+    })
 
-slr_resampled, slr_resampled_meta = resample_using_cdl(slr_reprojected, slr_meta_reprojected, cdl_meta_reprojected)
+    return resampled_data, updated_meta
 
-print("CDL shape:", cdl_reprojected.shape)
+cdl_resampled, cdl_resampled_meta = resample_data(cdl_reprojected, cdl_meta_reprojected, meta_red, Resampling.nearest)
+slr_resampled, slr_resampled_meta = resample_data(slr_reprojected, slr_meta_reprojected, meta_red, Resampling.bilinear)
 
-print("Original NDVI shape:", ndvi.shape)
+# print out the dataset shapes to see how the transformation has changed the resolution of the data
+print("NDVI shape:", ndvi.shape)
 
-print("Resampled NDVI shape:", ndvi_resampled.shape)
+print("Original CDL shape:", cdl_reprojected.shape)
+print('Resampled CDL:', cdl_resampled.shape)
 
 print("Original SLR shape:", slr_reprojected.shape)
-
 print("Resampled SLR shape:", slr_resampled.shape)
-
 ```
 
+
+This code places both rasters on the same map. We first select only corn (where the CDL value is equal to 1). Look on the CDL website if you are interested in other land classes.
+
 ```{python}
-def mask_rasters(cdl_raster, slr_raster, ndvi_rasters):
+corn_mask = cdl_resampled[0,:,:] == 1 # Sets the CDL to only values of 1, which is representative of corn
+SLR_MASK = slr_resampled[0,:,:] <= 10  # values that will be underwater
 
-    corn_mask = cdl_raster == 1
 
-    ABOVE_water_mask = slr_raster <= 1
 
-    corn_above_water_mask = corn_mask & ~ABOVE_water_mask
+fig, ax = plt.subplots(figsize=(15, 5))
 
-    corn_below_water_mask = corn_mask & ABOVE_water_mask
+ax.imshow(corn_mask, cmap='Greens', alpha=0.5)
+ax.imshow(SLR_MASK, cmap='Blues', alpha=0.5)
 
-    corn_above_water_mask = corn_above_water_mask[0,:,:]
+plt.tight_layout()
+plt.show()
 
-    corn_below_water_mask = corn_below_water_mask[0,:,:]
+# Calculate the area of overlap between the corn and water masks.
+overlap_mask = np.logical_and(corn_mask, SLR_MASK)
 
-    masked_ndvi_below_water = ndvi_rasters[:, corn_below_water_mask]
+# Get the resolution of the raster data (assuming both are the same)
+resolution = meta_red['transform'][0]  # Assuming the transform is consistent across all rasters
+# Calculate the area of each pixel in acres (1 acre = 43560 sq ft)
+pixel_area_acres = (30 * 3.28084)**2 / 43560 # convert from 30 meters to acres
 
-    masked_ndvi_above_water = ndvi_rasters[:, corn_above_water_mask]
+# Calculate the total impacted area
+impacted_acres = np.sum(overlap_mask) * pixel_area_acres
 
-    return {
+print(f"Acres impacted by flooding in corn fields: {impacted_acres:.2f}")
 
-        'corn_below_water': {
+# Calculate the area of corn based on the corn mask.
+corn_area_acres = np.sum(corn_mask) * pixel_area_acres
+print(f"Total acres of corn: {corn_area_acres:.2f}")
+```
 
-            'mask': corn_below_water_mask,
+What can we tell from the changes in corn acreage and the amount below
 
-            'ndvi': masked_ndvi_below_water,
+#### Graphically view the changes in NDVI.
 
-            'mean': np.mean(masked_ndvi_below_water, axis=1) if masked_ndvi_below_water.size > 0 else None,
+```{python}
+# Graph the differences
 
-            'min': np.min(masked_ndvi_below_water, axis=1) if masked_ndvi_below_water.size > 0 else None,
+corn_above_water_mask = corn_mask & ~SLR_MASK # set the water mask (corn and not below water)
+corn_below_water_mask = corn_mask & SLR_MASK # set the below water mask for corn
 
-            'max': np.max(masked_ndvi_below_water, axis=1) if masked_ndvi_below_water.size > 0 else None
+corn_above_water_mask = corn_above_water_mask[:,:]
+corn_below_water_mask = corn_below_water_mask[:,:]
+masked_ndvi_below_water = masked_ndvi[:, corn_below_water_mask] # find the NDVI for below water
+masked_ndvi_above_water = masked_ndvi[:, corn_above_water_mask] # find the NDVI for above water
 
-        },
 
-        'corn_above_water': {
-
-            'mask': corn_above_water_mask,
-
-            'ndvi': masked_ndvi_above_water,
-
-            'mean': np.mean(masked_ndvi_above_water, axis=1) if masked_ndvi_above_water.size > 0 else None,
-
-            'min': np.min(masked_ndvi_above_water, axis=1) if masked_ndvi_above_water.size > 0 else None,
-
-            'max': np.max(masked_ndvi_above_water, axis=1) if masked_ndvi_above_water.size > 0 else None
-
-        }
-
+ndvi_analysis =  {
+    'corn_below_water': { # gather data for the corn that is to be below water
+        'mask': corn_below_water_mask,
+        'ndvi': masked_ndvi_below_water,
+        'mean': np.mean(masked_ndvi_below_water, axis=1) if masked_ndvi_below_water.size > 0 else None,
+        'min': np.min(masked_ndvi_below_water, axis=1) if masked_ndvi_below_water.size > 0 else None,
+        'max': np.max(masked_ndvi_below_water, axis=1) if masked_ndvi_below_water.size > 0 else None
+    },
+    'corn_above_water': {
+        'mask': corn_above_water_mask,
+        'ndvi': masked_ndvi_above_water,
+        'mean': np.mean(masked_ndvi_above_water, axis=1) if masked_ndvi_above_water.size > 0 else None,
+        'min': np.min(masked_ndvi_above_water, axis=1) if masked_ndvi_above_water.size > 0 else None,
+        'max': np.max(masked_ndvi_above_water, axis=1) if masked_ndvi_above_water.size > 0 else None
     }
+}
 
-```
 
-```{python}
-def visualize_ndvi_analysis(ndvi_analysis, days):
 
-    plt.figure(figsize=(12, 6))
+plt.figure(figsize=(12, 6))
 
-    plt.subplot(1, 2, 1)
+plt.subplot(1, 2, 1)
+plt.plot(day, ndvi_analysis['corn_above_water']['mean'], label='Corn Above Water', color='green')
+plt.plot(day, ndvi_analysis['corn_below_water']['mean'], label='Corn Below Water', color='blue')
+plt.title('Mean NDVI')
+plt.xlabel('Days')
+plt.xticks(rotation=90)
+plt.ylabel('NDVI')
+plt.legend()
 
-    plt.plot(days, ndvi_analysis['corn_above_water']['mean'], label='Corn Above Water', color='green')
 
-    plt.plot(days, ndvi_analysis['corn_below_water']['mean'], label='Corn Below Water', color='blue')
+plt.subplot(1, 2, 2)
+plt.plot(day, ndvi_analysis['corn_above_water']['max'], label='Corn Above Water', color='green')
+plt.plot(day, ndvi_analysis['corn_below_water']['max'], label='Corn Below Water', color='blue')
+plt.title('Maximum NDVI')
+plt.xlabel('Days')
+plt.xticks(rotation=90)
+plt.ylabel('NDVI')
+plt.legend()
 
-    plt.title('Mean NDVI')
+plt.tight_layout()
+plt.show()
 
-    plt.xlabel('Days')
-
-    plt.xticks(rotation=90)
-
-    plt.ylabel('NDVI')
-
-    plt.legend()
-
-    plt.subplot(1, 2, 2)
-
-    plt.plot(days, ndvi_analysis['corn_above_water']['max'], label='Corn Above Water', color='green')
-
-    plt.plot(days, ndvi_analysis['corn_below_water']['max'], label='Corn Below Water', color='blue')
-
-    plt.title('Maximum NDVI')
-
-    plt.xlabel('Days')
-
-    plt.xticks(rotation=90)
-
-    plt.ylabel('NDVI')
-
-    plt.legend()
-
-    plt.tight_layout()
-
-    plt.show()
-
-```
-
-```{python}
-ndvi_analysis = mask_rasters(cdl_reprojected, slr_resampled, ndvi_resampled)
-
-visualize_ndvi_analysis(ndvi_analysis, day)
-```
-
-```{python}
 for condition in ['corn_below_water', 'corn_above_water']:
-
-    print(f"\n{condition.replace('_', ' ').title()} Corn Analysis per MODIS:")
-
+    print(f"\n{condition.replace('_', ' ').title()} Corn Analysis per tile:")
     for stat in ['mean', 'max']:
-
         print(f"{stat.capitalize()} NDVI: {ndvi_analysis[condition][stat]}")
-
 ```
+
+
+We can see that it is currently in trouble because the NDVI values are already lower, but we also know the number of acres impacted. What are the estimations for the loss of land? Building on that, what other areas beyond these calculations might be impacted as the sea rises?
+
+We can see that the corn predicted to be below water in 2050 is already showing signs of decreased NDVI values. As the sea level continues to rise and salinization impacts farmers, what are the future conditions for corn growing in Maryland? What are the estimated impacts? What can we do?
+
+
 
 ```{python}
-def visualize_ndvi_histogram(ndvi_analysis):
+# Final Analysis and Reflection Section
 
-    plt.figure(figsize=(12, 6))
+# Cropland and Crop Type Mapping Insights
+cropland_impact = {
+    'total_corn_acres': corn_area_acres,
+    'projected_flooded_acres': impacted_acres,
+    'percent_at_risk': (impacted_acres / corn_area_acres) * 100
+}
 
-    plt.hist(ndvi_analysis['corn_below_water']['ndvi'].flatten(), bins=30, alpha=0.5, label='Corn Below Water', color='blue')
+# Crop Area Estimation Insights
+ndvi_trend_analysis = {
+    'below_water_ndvi_mean': np.mean(ndvi_analysis['corn_below_water']['mean']),
+    'above_water_ndvi_mean': np.mean(ndvi_analysis['corn_above_water']['mean']),
+    'productivity_difference': np.mean(ndvi_analysis['corn_above_water']['mean']) - np.mean(ndvi_analysis['corn_below_water']['mean'])
+}
 
-    plt.hist(ndvi_analysis['corn_above_water']['ndvi'].flatten(), bins=30, alpha=0.5, label='Corn Above Water', color='green')
+# Print Narrative Report
+print("\n--- NASA Acres Essential Agricultural Variables (EAV) Analysis ---")
+print(f"Total Corn Acreage: {cropland_impact['total_corn_acres']:.2f} acres")
+print(f"Projected Flood Impact: {cropland_impact['projected_flooded_acres']:.2f} acres")
+print(f"Percentage of Corn Land at Risk: {cropland_impact['percent_at_risk']:.2f}%")
+print(f"\nNDVI Productivity Assessment:")
+print(f"  Corn Above Water NDVI: {ndvi_trend_analysis['above_water_ndvi_mean']:.4f}")
+print(f"  Corn Below Water NDVI: {ndvi_trend_analysis['below_water_ndvi_mean']:.4f}")
+print(f"  Productivity Difference: {ndvi_trend_analysis['productivity_difference']:.4f}")
 
-    plt.xlabel("NDVI values")
-
-    plt.ylabel("Frequency")
-
-    plt.title("Histogram of NDVI values for corn")
-
-    plt.legend(loc='upper right')
-
-visualize_ndvi_histogram(ndvi_analysis)
-
+# Reflection on Broader Implications
+print("\nReflection:")
+print("This analysis demonstrates the critical importance of:")
+print("1. Continuous monitoring of agricultural lands")
+print("2. Understanding climate change impacts on crop productivity")
+print("3. Developing adaptive strategies for coastal agricultural communities")
 ```
 
-What are the insights that we can derive from this module?
 
-What are the impacts of land being close to the water currently?
+## Knowledge Check
 
-What is the potential loss of productive land?
+Test your knowledge from this module.
 
-Where could there be errors given the sampling methods?
+- What are the insights that we can derive from this module?
+- What are the current impacts of land being close to the water?
+- What is the potential loss of productive land?
+- Where could there be errors given the sampling methods?
 
-# What to do next
+This is where mapping and monitoring the changes in our farmland is crucial. We can identify, monitor, and track changes as they arise. We can apply this view to a historical view using earlier imagery or later imagery to track the newest updates, even applying models to highlight potential future views.
 
-1.  Clip the MODIS data to the CDL data of only the agricultural values of interest
-2.  Find the average NDVI of these values
-3.  Clip this to the SLR area
-4.  Find the average NDVI of these values
-5.  Compare the changes for the year of 2018
 
-This will tell us the impacted area that could be effected by the floods
+## Printing and Sharing Results
 
-As we look into the future we should see this change become more drastic
+If you want to download the tifs you created, you can do so here.
 
-# ABOUT NASA ACRES AND THE CLIMATE RESILIENCE NETWORK
 
-## NASA Acres
+```{python}
+SLR_output_tif_path = '' # Replace with your desired path
+slr_masked_int = SLR_MASK.astype(rasterio.uint8)
 
-NASA Acres is NASA's U.S.-focused agriculture and food security Consortium. NASA Acres is commissioned under NASA's Applied Sciences Program and led by the University of Maryland, with over 30 partner institutions and growing. The consortium approach brings together public and private sectors, and allows for flexible partnerships and rapid action in delivering the benefits of NASA data and tools to U.S. agriculture decision makers. We work with people across the agriculture sector to develop Earth observation (EO)-based data and tools that strengthen U.S. agriculture.
 
-## Climate Resilience Network
+with rasterio.open(
+    SLR_output_tif_path,
+    'w',
+    driver='GTiff',
+    height=slr_resampled_meta['height'],
+    width=slr_resampled_meta['width'],
+    count=1,  # Number of bands in the output GeoTIFF
+    dtype=rasterio.uint8,
+    crs=slr_resampled_meta['crs'],
+    transform=slr_resampled_meta['transform'],
+    nodata=0 # Set nodata value if necessary
+) as dst:
+    dst.write(slr_masked_int, 1)
 
-Climate Resilience Network has the goal of unifying the University of Maryland's groundbreaking research with the immediate requirements of Maryland's decision-makers to address the complexities of climate change as it affects our home. GEOG's Grand Challenges project is aimed at promoting climate-resilient agriculture in Maryland, creating interactive tools designed to support research based decision-making.italicized text
+print(f"Masked SLR saved to: {SLR_output_tif_path}")
+```
 
-COUNTY LEVEL SHAPEFILE <https://resilience.climate.gov/datasets/nationalclimate::u-s-climate-and-coastal-inundation-projections-by-geography/explore?layer=0&location=2.619718%2C0.314282%2C1.74>
+
+```{python}
+corn_maskoutput_tif_path = '' # Replace with your desired path
+corn_mask_int = corn_mask.astype(rasterio.uint8)
+
+
+with rasterio.open(
+    corn_maskoutput_tif_path,
+    'w',
+    driver='GTiff',
+    height=cdl_resampled_meta['height'],
+    width=cdl_resampled_meta['width'],
+    count=1,  # Number of bands in the output GeoTIFF
+    dtype=rasterio.uint8,
+    crs=cdl_resampled_meta['crs'],
+    transform=cdl_resampled_meta['transform'],
+    nodata=0 # Set nodata value if necessary
+) as dst:
+    dst.write(corn_mask_int, 1)
+
+print(f"Masked SLR saved to: {corn_maskoutput_tif_path}")
+```
