@@ -127,9 +127,9 @@ Learn more about saltwater inundation from the National Oceanic and Atmospheric 
 
 Below is a simplified illustration of saltwater intrusion:
 
-![](images/Simplified_salt.png)[^2]
+![](images/Simplified_salt.png)[^3]
 
-[^2]: Courtesy of the authors
+[^3]: Courtesy of the authors
 
 
 # Data Processing Tools
@@ -157,6 +157,9 @@ import matplotlib.pyplot as plt  # Note: This is imported twice in your list
 
 # Library for making HTTP requests to web services and APIs
 import requests
+
+#import json package
+import json
 
 # API for parsing and creating XML data
 import xml.etree.ElementTree as ET
@@ -192,9 +195,25 @@ The base data that we are going to use for this module is Landsat 30 by 30 meter
 NASA Earth data requires a data pull request, this takes time to 'order', we can run this now to give the program time to gather the data we are requesting. **This code chunk is used for local downloads if you have not yet downloaded data**:
 
 ```{python}
+#| echo: false 
+#| 
 ## NASA Earth Data username and password
 USERNAME = "jfmartinez4" ## ENTER HERE
 PASSWORD = "Cafeconpan12!" ## ENTER HERE
+
+## The submit the Landsat tiles, we have provided you with the geojson file of Talbot County.
+## If you wish to use another county, download, and path to the other county geojson file
+county_path = 'data/Talbot_County.geojson' # Path to county
+
+```
+
+```{python}
+#| eval: false
+
+
+## NASA Earth Data username and password
+# USERNAME = "USERNAME" ## ENTER HERE
+# PASSWORD = "PASSWORD" ## ENTER HERE
 
 ## The submit the Landsat tiles, we have provided you with the geojson file of Talbot County.
 ## If you wish to use another county, download, and path to the other county geojson file
@@ -216,6 +235,8 @@ year = 2018 # Year of interest
 token = requests.post('https://appeears.earthdatacloud.nasa.gov/api/login',auth=(USERNAME, PASSWORD)).json()['token']
 ```
 ```{python}
+#| eval: false
+
 task = {'task_type': 'area',
           'task_name': 'Talbot_County',
           'params': {
@@ -234,6 +255,14 @@ task = {'task_type': 'area',
                               "projection": "native"}}}
 
 task_id = requests.post('https://appeears.earthdatacloud.nasa.gov/api/task',json=task,headers={'Authorization': f'Bearer {token}'}).json()
+```
+
+```{python}
+#| echo: false
+task_id = {}
+
+task_id['task_id'] = '0bf195aa-7544-4a53-83c9-793e36cf821d'
+task_id['status'] = 'done'
 ```
 
 You should receive an email from APPEEARS that says the task has started.
@@ -403,13 +432,7 @@ data = {} # Create an empty dictionary to collect the data from appeears
 bundle
 ```
 
-```{python}
 
-# Load the JSON file with pre-downloaded bundle data
-with open("data/Talbot_County.geojson", "r") as f:
-    bundle = json.load(f)
-
-```
 ```{python}
 
 for file in bundle['files']: # loops through each Landsat tile that we called.
@@ -702,6 +725,9 @@ If you want to download the tifs you created, you can do so here.
 
 
 ```{python}
+#| eval: false
+
+
 SLR_output_tif_path = '' # Replace with your desired path
 slr_masked_int = SLR_MASK.astype(rasterio.uint8)
 
@@ -724,7 +750,10 @@ print(f"Masked SLR saved to: {SLR_output_tif_path}")
 ```
 
 
-```{python}
+```{python} 
+#| eval: false
+
+
 corn_maskoutput_tif_path = '' # Replace with your desired path
 corn_mask_int = corn_mask.astype(rasterio.uint8)
 
