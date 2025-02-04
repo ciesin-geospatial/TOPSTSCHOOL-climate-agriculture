@@ -194,18 +194,7 @@ The base data that we are going to use for this module is Landsat 30 by 30 meter
 
 NASA Earth data requires a data pull request, this takes time to 'order', we can run this now to give the program time to gather the data we are requesting. **This code chunk is used for local downloads if you have not yet downloaded data**:
 
-```{python}
-#| echo: false 
-#| 
-## NASA Earth Data username and password
-USERNAME = "jfmartinez4" ## ENTER HERE
-PASSWORD = "Cafeconpan12!" ## ENTER HERE
 
-## The submit the Landsat tiles, we have provided you with the geojson file of Talbot County.
-## If you wish to use another county, download, and path to the other county geojson file
-county_path = 'data/Talbot_County.geojson' # Path to county
-
-```
 
 ```{python}
 #| eval: false
@@ -429,7 +418,6 @@ def doy_2_date(day_of_year_str): # This function changes the DOY value to a more
 bundle = requests.get(f'https://appeears.earthdatacloud.nasa.gov/api/bundle/{task_id["task_id"]}',headers={'Authorization': f'Bearer {token}'}).json()
 QA_data = {}
 data = {} # Create an empty dictionary to collect the data from appeears
-bundle
 ```
 
 
