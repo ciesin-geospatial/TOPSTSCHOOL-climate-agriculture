@@ -4,6 +4,8 @@ FROM rocker/binder:latest
 # Use root user for installations
 USER root
 
+ADD . /CLIMATE
+
 # Install system dependencies for Python and Quarto
 RUN apt-get update && apt-get install -y \
     libkrb5-dev \
