@@ -1,10 +1,11 @@
 # Base image
 FROM rocker/binder:latest
 
+ADD . /CLIMATE
+
 # Use root user for installations
 USER root
 
-ADD . /CLIMATE
 
 # Install system dependencies for Python and Quarto
 RUN apt-get update && apt-get install -y \
