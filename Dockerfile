@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir \
     jupyterlab-quarto \
     geopandas pyproj shapely xarray rioxarray \
     rasterio netcdf4 h5netcdf dask bottleneck nc-time-axis folium \
-    numpy pandas matplotlib requests \
+    numpy pandas matplotlib requests boto3 \
     rasterstats pygadm plotly pygris contextily tabulate \
     scipy pysal splot gssapi arcgis jupyterlab
 
