@@ -146,6 +146,10 @@ import geopandas as gpd
 # Handles reading, writing, and processing of geospatial raster data (like satellite imagery or elevation data)
 import rasterio
 
+#Using Amazon S3 Buckets for data download
+from rasterio.session import AWSSession
+import boto3
+
 # Fundamental package for scientific computing in Python, provides support for large multi-dimensional arrays and matrices
 import numpy as np  # Note: This is imported twice in your list
 
@@ -219,42 +223,53 @@ county_reprojected = county_data.to_crs('EPSG:4326')
 year = 2018 # Year of interest
 ```
 
+### Creating an APPEEARS token
+
+Accessing data directly from the NASA Earthdata Cloud APPEEARS website requires to make a request with your Earthdata Username and Password. This request generates a **token**:
 ```{python}
+
 # Get the token from your Earth Data account
 token = requests.post('https://appeears.earthdatacloud.nasa.gov/api/login',auth=(USERNAME, PASSWORD)).json()['token']
 ```
+
+With the token, you can create an APPEEARS task that requests a data package. An email is sent to you with confirmation and updates on your request.  NOTE: This requrest may take a few hours to be filled.
+
 ```{python}
 #| eval: false
 
-task = {'task_type': 'area',
-          'task_name': 'Talbot_County',
-          'params': {
-                    'dates': [{'startDate':  f'06-01-{year}' , 'endDate': f'09-30-{year}'}],# Set the start and end dates for summer sections
-                    'layers': [{'layer': 'SR_B4', 'product':'L08.002'},
-                               {'layer': 'SR_B5', 'product':'L08.002'}], # Data of interest is the NDVI values
-                    'geo': { #The geo field should contain the geoJSON, currently it is in a set
-                        'type': 'FeatureCollection',
-                        'features': [{
-                            'type': 'Feature',
-                            'properties': {},
-                            'geometry': county_reprojected.geometry.iloc[0].__geo_interface__ #Extracting the geometry from the GeoPandas DataFrame as a GeoJSON-compatible dictionary
-                        }]
-                    },
-                    "output": {"format": {"type": "geotiff"},
-                              "projection": "native"}}}
+# task = {'task_type': 'area',
+#           'task_name': 'Talbot_County',
+#           'params': {
+#                     'dates': [{'startDate':  f'06-01-{year}' , 'endDate': f'09-30-{year}'}],# Set the start and end dates for summer sections
+#                     'layers': [{'layer': 'SR_B4', 'product':'L08.002'},
+#                                {'layer': 'SR_B5', 'product':'L08.002'}], # Data of interest is the NDVI values
+#                     'geo': { #The geo field should contain the geoJSON, currently it is in a set
+#                         'type': 'FeatureCollection',
+#                         'features': [{
+#                             'type': 'Feature',
+#                             'properties': {},
+#                             'geometry': county_reprojected.geometry.iloc[0].__geo_interface__ #Extracting the geometry from the GeoPandas DataFrame as a GeoJSON-compatible dictionary
+#                         }]
+#                     },
+#                     "output": {"format": {"type": "geotiff"},
+#                               "projection": "native"}}}
 
-task_id = requests.post('https://appeears.earthdatacloud.nasa.gov/api/task',json=task,headers={'Authorization': f'Bearer {token}'}).json()
+# task_id = requests.post('https://appeears.earthdatacloud.nasa.gov/api/task',json=task,headers={'Authorization': f'Bearer {token}'}).json()
 ```
+
+You should receive an email from APPEEARS that says the task has started. 
 
 ```{python}
 #| echo: false
-task_id = {}
 
-task_id['task_id'] = '0bf195aa-7544-4a53-83c9-793e36cf821d'
+# I've created a request with ID for this session: 
+task_id = {}
+	
+task_id['task_id'] = 'f7f2bc1b-46bc-4d5d-9421-74e165b576ed'
 task_id['status'] = 'done'
 ```
 
-You should receive an email from APPEEARS that says the task has started.
+
 
 
 ## Working with Rasters
@@ -381,21 +396,46 @@ cdl_reprojected, cdl_meta_reprojected = reproject_raster(cdl_data, cdl_meta['crs
 
 The eastern seaboard has seen changes in the sea level along with increased flooding and the decrease in the predictability of water flow from rivers. This data comes from [NOAA](https://coast.noaa.gov/data/digitalcoast/pdf/slr-inundation-methods.pdf), this raster is the projection of inundated areas by the year 2050. Data access can be found [here](https://coast.noaa.gov/slrdata/Depth_Rasters/MD/index.html).
 
+Amazon AWS S3 Bucket - Cloud Access to the data:
 ```{python}
-# Path to the stored sea level rise tif file
-slr_path = 'data/MD_East_slr_depth_3_5ft.tif'
 
-# This allows us to open the raster file, then reproject and close the original file so we are not storing duplicates of the raster
-with rasterio.open(slr_path) as slr_raster:
+
+# S3 path to the sea level rise TIFF file
+slr_s3_url = "https://tops-school.s3.us-west-2.amazonaws.com/climate-agriculture-module/MD_East_slr_depth_3_5ft.tif"
+
+# Convert S3 URL to GDAL-compatible format
+slr_s3_gdal_path = "/vsicurl/" + slr_s3_url  # Allows rasterio to read from S3 directly
+
+# Open the raster from S3, then reproject
+with rasterio.open(slr_s3_gdal_path) as slr_raster:
     slr_meta = slr_raster.meta.copy()
-    slr_meta['nodata'] = 0
+    slr_meta['nodata'] = 0  # Set nodata value
 
     # Reproject
     slr_reprojected, slr_meta_reprojected = reproject_raster(
         slr_raster,
         slr_meta['crs'],
         slr_meta['transform'],
-        'EPSG:4326')
+        'EPSG:4326'
+    )
+```
+
+If you've downloaded the data locally:
+```{python}
+# # Path to the stored sea level rise tif file
+# slr_path = 'data/MD_East_slr_depth_3_5ft.tif'
+
+# # This allows us to open the raster file, then reproject and close the original file so we are not storing duplicates of the raster
+# with rasterio.open(slr_path) as slr_raster:
+#     slr_meta = slr_raster.meta.copy()
+#     slr_meta['nodata'] = 0
+
+#     # Reproject
+#     slr_reprojected, slr_meta_reprojected = reproject_raster(
+#         slr_raster,
+#         slr_meta['crs'],
+#         slr_meta['transform'],
+#         'EPSG:4326')
 ```
 
 ### Working with NASA APPEEARS Data
@@ -414,92 +454,103 @@ def doy_2_date(day_of_year_str): # This function changes the DOY value to a more
               return target_date.strftime('%m-%d-%Y') ## return proper formatting
 ```
 
+The token and Task ID created previously for APPEEARS can be used here to create a 'bundle' which carries multiple datasets from APPEEARS
 ```{python}
 bundle = requests.get(f'https://appeears.earthdatacloud.nasa.gov/api/bundle/{task_id["task_id"]}',headers={'Authorization': f'Bearer {token}'}).json()
 QA_data = {}
 data = {} # Create an empty dictionary to collect the data from appeears
 ```
 
-
 ```{python}
-
 for file in bundle['files']: # loops through each Landsat tile that we called.
     file_id = file['file_id'] # store the name of the tile
-    if '_doy' in file['file_name']: # doy is the day of the year, ordering the dictionary by doy allows for easier access later
-      # This allows us to get just the files of interest. We only want the
-      if "SR_B4" in file['file_name'] or "SR_B5" in file['file_name'] or "QA_PIXEL_C" in file['file_name']:
-          datesy = file['file_name'].split('_doy')[1][:7] # seperation of doy values
-          doy = doy_2_date(datesy) # calling the function (from Julian day (001 is the first day of the year, 365 is the last day of the year) to mm-dd-yyyy
-          band = file['file_name'].split('/L08.002_')[1][:5]
-      else:
-          continue
-      # access the NDVI data via request library
-      file_download = requests.get(
-          'https://appeears.earthdatacloud.nasa.gov/api/bundle/{0}/{1}'.format(task_id['task_id'], file_id),
-          headers={'Authorization': 'Bearer {0}'.format(token)},
-          allow_redirects=True,
-          stream=True)
-      # Get the status of the file
-      file_download.raise_for_status()
-      # This error warning allows for continuation even if there is an error
-      if not file_download.content:
-          print(f"Warning: Empty file downloaded for {file['file_name']}") # print warning message if there is an error, continue to next data set otherwise
-          continue
-      file_content = BytesIO(file_download.content) # format the downloaded content
-      with rasterio.open(file_content) as src_initial: # open the accessed raster
-          src = src_initial.read(1, masked=True) # read in the layer data
-          src_meta = src_initial.meta # access the metadata
-          dst_crs = 'EPSG:4326' # define the crs
-          transform, width, height = calculate_default_transform(
-              src_meta['crs'], dst_crs, src.shape[1], src.shape[0], *src_initial.bounds)
-          kwargs = src_meta.copy()
-          # collect the current meta data information
-          kwargs.update({
-              'crs': dst_crs,
-              'transform': transform,
-              'width': width,
-              'height': height
-          })
+    if '_doy' in file['file_name']: 
+        # doy is the day of the year, ordering the dictionary by doy allows for easier access later
+        # This allows us to get just the files of interest. We only want the
+        if "SR_B4" in file['file_name'] or "SR_B5" in file['file_name'] or "QA_PIXEL_C" in file['file_name']:
+            datesy = file['file_name'].split('_doy')[1][:7] # seperation of doy values
+            doy = doy_2_date(datesy) # calling the function (from Julian day (001 is the first day of the year, 365 is the last day of the year) to mm-dd-yyyy
+            band = file['file_name'].split('/L08.002_')[1][:5]
+            # access the NDVI data via request library
+            file_download = requests.get('https://appeears.earthdatacloud.nasa.gov/api/bundle/{0}/{1}'.format(task_id['task_id'], file_id), headers={'Authorization': 'Bearer {0}'.format(token)}, allow_redirects=True, stream=True)
+            # Get the status of the file
+            file_download.raise_for_status()
+            # This error warning allows for continuation even if there is an error
+            if not file_download.content:
+                print(f"Warning: Empty file downloaded for {file['file_name']}") # print warning message if there is an error, continue to next data set otherwise
+                continue
+            file_content = BytesIO(file_download.content) # format the downloaded content
+            with rasterio.open(file_content) as src_initial: # open the accessed raster
+                src = src_initial.read(1, masked=True) # read in the layer data
+                src_meta = src_initial.meta # access the metadata
+                dst_crs = 'EPSG:4326' # define the crs
+                transform, width, height = calculate_default_transform(
+                    src_meta['crs'], dst_crs, src.shape[1], src.shape[0], *src_initial.bounds)
+                kwargs = src_meta.copy()
+                # collect the current meta data information
+                kwargs.update({
+                    'crs': dst_crs,
+                    'transform': transform,
+                    'width': width,
+                    'height': height
+                })
 
-          dst = np.zeros((height, width), dtype=src_meta['dtype'])
-          # Begin the reprojection process based on earlier defined projections of interest
-          reproject(
-              source=src,
-              destination=dst,
-              src_transform=src_meta['transform'],
-              src_crs=src_meta['crs'],
-              dst_transform=transform,
-              dst_crs=dst_crs,
-              resampling=Resampling.nearest)
+                dst = np.zeros((height, width), dtype=src_meta['dtype'])
+                # Begin the reprojection process based on earlier defined projections of interest
+                reproject(
+                    source=src,
+                    destination=dst,
+                    src_transform=src_meta['transform'],
+                    src_crs=src_meta['crs'],
+                    dst_transform=transform,
+                    dst_crs=dst_crs,
+                    resampling=Resampling.nearest)
 
-          # update the data (if no data set to 0)
-          kwargs.update({'nodata': 0})
-          # name the data
-          key = f'{band}'
-          if key not in data:
-              # if first dataset, append the metadata to the entire dictionary
-              data[key] = {'data': [], 'meta': kwargs, 'doy': []}
-          # stack the data and data
-          data[key]['data'].append(dst)
-          data[key]['doy'].append(doy)
+                # update the data (if no data set to 0)
+                kwargs.update({'nodata': 0})
+                # name the data
+                key = f'{band}'
+                if key not in data:
+                    # if first dataset, append the metadata to the entire dictionary
+                    data[key] = {'data': [], 'meta': kwargs, 'doy': []}
+                # stack the data and data
+                data[key]['data'].append(dst)
+                data[key]['doy'].append(doy)
+        else:
+          continue
 
     else:
       continue
 
+
+```
+
+Extract some of the data into variables
+```{python}
+
+
 # name the stacked data, day, and metadata to be referenced later
-nir = np.stack(data['SR_B5']['data']) / 100
-red = np.stack(data['SR_B4']['data']) / 100
+nir = np.stack(data['SR_B5']['data']) / 1000
+red = np.stack(data['SR_B4']['data']) / 1000
 qa_flags = np.stack(data['QA_PI']['data'])
 day = np.stack(data['SR_B5']['doy'])
 meta_nir = data['SR_B5']['meta']
 meta_red = data['SR_B4']['meta']
 
-ndvi = np.where((nir + red) != 0, (nir - red) / (nir + red), 0)
+#handing 0 and NaN values when dividing
+denominator = nir + red
+denominator = np.where(denominator == 0, np.nan, denominator)  # Avoid division by zero
+ndvi = (nir - red) / denominator  # Compute NDVI safely
+ndvi = np.nan_to_num(ndvi, nan=0)
+
+
 ```
+
 
 Now that we have an NDVI dataset for each date, we have to filter out the cloudy or otherwise poor-quality NDVI values.
 
 ![](images/PixelQA.png)
+
 
 ```{python}
 qa_flags_to_mask = [21824, 21890, 21952, 22018, 22146, 22208] ## These are the values that indicate the higher quality of pixel
@@ -553,21 +604,25 @@ print("Resampled SLR shape:", slr_resampled.shape)
 ```
 
 
+
 This code places both rasters on the same map. We first select only corn (where the CDL value is equal to 1). Look on the CDL website if you are interested in other land classes.
 
+
 ```{python}
-corn_mask = cdl_resampled[0,:,:] == 1 # Sets the CDL to only values of 1, which is representative of corn
-SLR_MASK = slr_resampled[0,:,:] <= 10  # values that will be underwater
+# Create corn and water masks
+corn_mask = (cdl_resampled[0, :, :] == 1).astype(np.uint8)  # Corn is labeled as 1 in CDL
+SLR_MASK = (slr_resampled[0, :, :] <= 10).astype(np.uint8)  # Areas predicted to be underwater
 
-
-
+# Visualize the masks
 fig, ax = plt.subplots(figsize=(15, 5))
-
-ax.imshow(corn_mask, cmap='Greens', alpha=0.5)
-ax.imshow(SLR_MASK, cmap='Blues', alpha=0.5)
+ax.imshow(corn_mask, cmap='Greens', alpha=0.5, label="Corn Fields")
+ax.imshow(SLR_MASK, cmap='Blues', alpha=0.5, label="Flooded Areas")
 
 plt.tight_layout()
 plt.show()
+```
+
+```{python}
 
 # Calculate the area of overlap between the corn and water masks.
 overlap_mask = np.logical_and(corn_mask, SLR_MASK)
@@ -591,67 +646,83 @@ What can we tell from the changes in corn acreage and the amount below
 
 #### Graphically view the changes in NDVI.
 
+
 ```{python}
-# Graph the differences
+# Ensure masks match NDVI shape (time, height, width)
+corn_below_water_mask = np.expand_dims(corn_mask & SLR_MASK, axis=0)  # Add time axis
+corn_below_water_mask = np.broadcast_to(corn_below_water_mask, masked_ndvi.shape)  # Match NDVI shape
 
-corn_above_water_mask = corn_mask & ~SLR_MASK # set the water mask (corn and not below water)
-corn_below_water_mask = corn_mask & SLR_MASK # set the below water mask for corn
+corn_above_water_mask = np.expand_dims(corn_mask & ~SLR_MASK, axis=0)  # Add time axis
+corn_above_water_mask = np.broadcast_to(corn_above_water_mask, masked_ndvi.shape)  # Match NDVI shape
 
-corn_above_water_mask = corn_above_water_mask[:,:]
-corn_below_water_mask = corn_below_water_mask[:,:]
-masked_ndvi_below_water = masked_ndvi[:, corn_below_water_mask] # find the NDVI for below water
-masked_ndvi_above_water = masked_ndvi[:, corn_above_water_mask] # find the NDVI for above water
+# Extract NDVI values using masks
+masked_ndvi_below_water = np.where(corn_below_water_mask, masked_ndvi, np.nan)
+masked_ndvi_above_water = np.where(corn_above_water_mask, masked_ndvi, np.nan)
 
+```
 
-ndvi_analysis =  {
-    'corn_below_water': { # gather data for the corn that is to be below water
+```{python}
+# Safe computation of NDVI statistics
+def safe_stat(ndvi_array, func):
+    valid_values = np.where(~np.isnan(ndvi_array), ndvi_array, np.nan)
+    return func(valid_values, axis=(1, 2)) if np.any(~np.isnan(valid_values)) else 0
+
+ndvi_analysis = {
+    'corn_below_water': {
         'mask': corn_below_water_mask,
-        'ndvi': masked_ndvi_below_water,
-        'mean': np.mean(masked_ndvi_below_water, axis=1) if masked_ndvi_below_water.size > 0 else None,
-        'min': np.min(masked_ndvi_below_water, axis=1) if masked_ndvi_below_water.size > 0 else None,
-        'max': np.max(masked_ndvi_below_water, axis=1) if masked_ndvi_below_water.size > 0 else None
+        'ndvi': np.nan_to_num(masked_ndvi_below_water, nan=0),  # Replace NaN with 0
+        'mean': np.nan_to_num(safe_stat(masked_ndvi_below_water, np.nanmean), nan=0),
+        'min': np.nan_to_num(safe_stat(masked_ndvi_below_water, np.nanmin), nan=0),
+        'max': np.nan_to_num(safe_stat(masked_ndvi_below_water, np.nanmax), nan=0),
     },
     'corn_above_water': {
         'mask': corn_above_water_mask,
-        'ndvi': masked_ndvi_above_water,
-        'mean': np.mean(masked_ndvi_above_water, axis=1) if masked_ndvi_above_water.size > 0 else None,
-        'min': np.min(masked_ndvi_above_water, axis=1) if masked_ndvi_above_water.size > 0 else None,
-        'max': np.max(masked_ndvi_above_water, axis=1) if masked_ndvi_above_water.size > 0 else None
+        'ndvi': np.nan_to_num(masked_ndvi_above_water, nan=0),  # Replace NaN with 0
+        'mean': np.nan_to_num(safe_stat(masked_ndvi_above_water, np.nanmean), nan=0),
+        'min': np.nan_to_num(safe_stat(masked_ndvi_above_water, np.nanmin), nan=0),
+        'max': np.nan_to_num(safe_stat(masked_ndvi_above_water, np.nanmax), nan=0),
     }
 }
 
 
-
+# Plot the results
 plt.figure(figsize=(12, 6))
 
+# Mean NDVI Plot
 plt.subplot(1, 2, 1)
-plt.plot(day, ndvi_analysis['corn_above_water']['mean'], label='Corn Above Water', color='green')
-plt.plot(day, ndvi_analysis['corn_below_water']['mean'], label='Corn Below Water', color='blue')
+plt.plot(day[:len(ndvi_analysis['corn_above_water']['mean'])], ndvi_analysis['corn_above_water']['mean'], 
+         label='Corn Above Water', color='green', marker='o')
+plt.plot(day[:len(ndvi_analysis['corn_below_water']['mean'])], ndvi_analysis['corn_below_water']['mean'], 
+         label='Corn Below Water', color='blue', marker='o')
 plt.title('Mean NDVI')
 plt.xlabel('Days')
 plt.xticks(rotation=90)
 plt.ylabel('NDVI')
 plt.legend()
+plt.grid(True, linestyle="--")
 
-
+# Maximum NDVI Plot
 plt.subplot(1, 2, 2)
-plt.plot(day, ndvi_analysis['corn_above_water']['max'], label='Corn Above Water', color='green')
-plt.plot(day, ndvi_analysis['corn_below_water']['max'], label='Corn Below Water', color='blue')
+plt.plot(day[:len(ndvi_analysis['corn_above_water']['max'])], ndvi_analysis['corn_above_water']['max'], 
+         label='Corn Above Water', color='green', linestyle='dashed', marker='s')
+plt.plot(day[:len(ndvi_analysis['corn_below_water']['max'])], ndvi_analysis['corn_below_water']['max'], 
+         label='Corn Below Water', color='blue', linestyle='dashed', marker='s')
 plt.title('Maximum NDVI')
 plt.xlabel('Days')
 plt.xticks(rotation=90)
 plt.ylabel('NDVI')
 plt.legend()
+plt.grid(True, linestyle="--")
 
 plt.tight_layout()
 plt.show()
 
+# Print the NDVI analysis summary
 for condition in ['corn_below_water', 'corn_above_water']:
     print(f"\n{condition.replace('_', ' ').title()} Corn Analysis per tile:")
     for stat in ['mean', 'max']:
         print(f"{stat.capitalize()} NDVI: {ndvi_analysis[condition][stat]}")
 ```
-
 
 We can see that it is currently in trouble because the NDVI values are already lower, but we also know the number of acres impacted. What are the estimations for the loss of land? Building on that, what other areas beyond these calculations might be impacted as the sea rises?
 
