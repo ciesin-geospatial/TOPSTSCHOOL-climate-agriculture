@@ -102,6 +102,8 @@ var maximumTemperatureVis = {
 
 Great! Now that we have visualizations of temperature in 1980 and 2023, let’s import our state boundaries for Arizona. We will clip the average maximum temperature for both our points in time to visualize just Arizona.
 
+[Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
+
 ``` javascript
 //Load Arizona's boundary from TIGER
 var arizona = ee.FeatureCollection('TIGER/2018/States')
@@ -122,6 +124,8 @@ Map.addLayer(clippedAverageTemperature_1980, maximumTemperatureVis, 'Average Max
 ```
 
 Great! We’ve subset and cleaned the data so far. Next, we will calculate the temperature difference between 1980 and 2023 to see how it has changed in Arizona.
+
+[Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
 ``` javascript
 var temperatureDifference = clippedAverageTemperature_2023.subtract(clippedAverageTemperature_1980);
@@ -149,6 +153,8 @@ For this analysis, we will need to access three Cloud Assets:
 
 By clicking [here](https://code.earthengine.google.com/?asset=projects/ee-cdeodati/assets/SVI_20_overall), you will access the SVI Cloud Asset. By clicking [here](https://code.earthengine.google.com/?asset=projects/ee-cdeodati/assets/AZ_A65TO79_CNT), you will access the 65 to 79 age group Cloud Asset. By clicking [here](https://code.earthengine.google.com/?asset=projects/ee-cdeodati/assets/AZ_A80OV_CNT), you will access the over 80 age group Cloud Asset. Add these to your project and rename the variables 'svi_overall', 'az65_79', and 'az_80ov', respectively. You can do this in the import bar on the top of the Code Editor.
 
+[Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
+
 ``` javascript
 //Import SVI overall 
 var svi_overall = ee.Image(svi_overall);
@@ -170,6 +176,8 @@ Map.addLayer(sviArizona, svi_palette, 'SVI');
 ![](images/svi_gee.png){fig-align="center"}
 
 We can now visualize SVI on the map over Arizona! Next, we’ll generate a chart to display average temperature change by SVI.
+
+[Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
 ``` javascript
 //Group SVI into 5 categories
@@ -237,6 +245,8 @@ print(SVIchart);
 We now have a visual chart showing how temperature has changed based on social vulnerability groups. What can you notice about more and less vulnerable populations and temperature change?
 
 Now that we have visualized social vulnerability in Arizona, let’s use US GRIDS to look at a specific population vulnerable to heat: those over 65. To do this, we’ll use US GRIDS 65-79 and over 80 years old age groups.
+
+[Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
 ``` javascript
 //Create a 65+ age group. For this, we’ll use the .add function
