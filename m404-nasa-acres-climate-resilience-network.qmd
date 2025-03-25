@@ -212,6 +212,7 @@ county_path = 'data/Talbot_County.geojson' # Path to county
 
 ```
 
+
 ```{python}
 #| eval: false
 
