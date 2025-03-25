@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "31c5be72",
+   "id": "212a941f",
    "metadata": {},
    "source": [
     "---\n",
@@ -88,8 +88,7 @@
     "\n",
     "[Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)\n",
     "\n",
-    "\n",
-    "```{javascript}\n",
+    "```{.javascript display-language=true}\n",
     "//Note: In Google Earth Engine, we can use ‘//’ to write notes without having it impact our code. The Code Editor will ignore whatever is written after ‘//’\n",
     "\n",
     "//Import Daymet dataset for 2023: Daily Surface Weather and Climatological Summaries\n",
@@ -118,13 +117,12 @@
     "};\n",
     "```\n",
     "\n",
-    "\n",
     "Great! Now that we have visualizations of temperature in 1980 and 2023, let’s import our state boundaries for Arizona. We will clip the average maximum temperature for both our points in time to visualize just Arizona.\n",
     "\n",
     "[Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)\n",
     "\n",
     "\n",
-    "```{js}\n",
+    "```{ojs}\n",
     "//Load Arizona's boundary from TIGER\n",
     "var arizona = ee.FeatureCollection('TIGER/2018/States')\n",
     "                .filter(ee.Filter.eq('NAME', 'Arizona')); //Google Earth Engine will recognize the states by their name; feel free to experiment with loading in additional states to see how it works\n",

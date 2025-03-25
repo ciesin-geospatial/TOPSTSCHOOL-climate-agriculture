@@ -80,7 +80,7 @@ For this lesson, we will import each dataset and clean the data before importing
 
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
-```{javascript}
+```{.javascript display-language=true}
 //Note: In Google Earth Engine, we can use ‘//’ to write notes without having it impact our code. The Code Editor will ignore whatever is written after ‘//’
 
 //Import Daymet dataset for 2023: Daily Surface Weather and Climatological Summaries
@@ -113,7 +113,7 @@ Great! Now that we have visualizations of temperature in 1980 and 2023, let’s 
 
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
-```{js}
+```{ojs}
 //Load Arizona's boundary from TIGER
 var arizona = ee.FeatureCollection('TIGER/2018/States')
                 .filter(ee.Filter.eq('NAME', 'Arizona')); //Google Earth Engine will recognize the states by their name; feel free to experiment with loading in additional states to see how it works
