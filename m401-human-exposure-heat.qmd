@@ -113,7 +113,7 @@ Great! Now that we have visualizations of temperature in 1980 and 2023, let’s 
 
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
-```{ojs}
+```{.javascript display-language=true}
 //Load Arizona's boundary from TIGER
 var arizona = ee.FeatureCollection('TIGER/2018/States')
                 .filter(ee.Filter.eq('NAME', 'Arizona')); //Google Earth Engine will recognize the states by their name; feel free to experiment with loading in additional states to see how it works
@@ -136,7 +136,7 @@ Great! We’ve subset and cleaned the data so far. Next, we will calculate the t
 
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
-```{js}
+```{.javascript display-language=true}
 var temperatureDifference = clippedAverageTemperature_2023.subtract(clippedAverageTemperature_1980);
 //Using ‘subtract’ will subtract the pixel values of two images.
 
@@ -164,7 +164,7 @@ By clicking [here](https://code.earthengine.google.com/?asset=projects/ee-cdeoda
 
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
-```{js}
+```{.javascript display-language=true}
 //Import SVI overall 
 var svi_overall = ee.Image(svi_overall);
 
@@ -188,7 +188,7 @@ We can now visualize SVI on the map over Arizona! Next, we’ll generate a chart
 
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
-```{js}
+```{.javascript display-language=true}
 //Group SVI into 5 categories
 var sviQuintiles = sviArizona.expression(
    "(b1 < 0.2) ? 0" +  // SVI < 0.2
@@ -257,7 +257,7 @@ Now that we have visualized social vulnerability in Arizona, let’s use US GRID
 
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
-```{js}
+```{.javascript display-language=true}
 //Create a 65+ age group. For this, we’ll use the .add function
 var az_65plus = az65_79.add(az_80ov); //Note: you cannot create variables in GEE that start with numbers. For this reason, we are naming the variable az_65plus rather than 65plus_az
 
