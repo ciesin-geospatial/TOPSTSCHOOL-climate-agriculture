@@ -3,6 +3,7 @@ title: "Understanding Human Exposure to Heat"
 format: html
 author: "Christina Deodatis"
 date: "March 18, 2025"
+bibliography: human-heat-references.bib
 ---
 
 ## Overview
@@ -11,7 +12,11 @@ In this bite-size lesson, you will use Google Earth Engine to look at data from 
 
 ## Learning Objectives
 
-After completing this lesson, you should be able to: - Search for and import data into the Google Earth Engine Code Editor - Subset data in Google Earth Engine - Understand how to use cloud assets - Visualize the relationship between temperature change and social vulnerability using scatter plots
+After completing this lesson, you should be able to: 
+- Search for and import data into the Google Earth Engine Code Editor 
+- Subset data in Google Earth Engine 
+- Understand how to use cloud assets 
+- Visualize the relationship between temperature change and social vulnerability using scatter plots
 
 ## Introduction
 
@@ -72,7 +77,6 @@ For this lesson, we will import each dataset and clean the data before importing
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
 ```{js}
-#| eval: false
 //Note: In Google Earth Engine, we can use ‘//’ to write notes without having it impact our code. The Code Editor will ignore whatever is written after ‘//’
 
 //Import Daymet dataset for 2023: Daily Surface Weather and Climatological Summaries
@@ -106,7 +110,6 @@ Great! Now that we have visualizations of temperature in 1980 and 2023, let’s 
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
 ```{js}
-#| eval: false
 //Load Arizona's boundary from TIGER
 var arizona = ee.FeatureCollection('TIGER/2018/States')
                 .filter(ee.Filter.eq('NAME', 'Arizona')); //Google Earth Engine will recognize the states by their name; feel free to experiment with loading in additional states to see how it works
@@ -130,7 +133,6 @@ Great! We’ve subset and cleaned the data so far. Next, we will calculate the t
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
 ```{js}
-#| eval: false
 var temperatureDifference = clippedAverageTemperature_2023.subtract(clippedAverageTemperature_1980);
 //Using ‘subtract’ will subtract the pixel values of two images.
 
@@ -159,7 +161,6 @@ By clicking [here](https://code.earthengine.google.com/?asset=projects/ee-cdeoda
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
 ```{js}
-#| eval: false
 //Import SVI overall 
 var svi_overall = ee.Image(svi_overall);
 
@@ -184,7 +185,6 @@ We can now visualize SVI on the map over Arizona! Next, we’ll generate a chart
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
 ```{js}
-#| eval: false
 //Group SVI into 5 categories
 var sviQuintiles = sviArizona.expression(
    "(b1 < 0.2) ? 0" +  // SVI < 0.2
@@ -254,7 +254,6 @@ Now that we have visualized social vulnerability in Arizona, let’s use US GRID
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
 ```{js}
-#| eval: false
 //Create a 65+ age group. For this, we’ll use the .add function
 var az_65plus = az65_79.add(az_80ov); //Note: you cannot create variables in GEE that start with numbers. For this reason, we are naming the variable az_65plus rather than 65plus_az
 
