@@ -26,14 +26,10 @@ website:
         url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/index.html
       - text: "Lessons"
         menu:
-          - text: "Lesson 1: NASA Acres and Climate Resilience Network"
-            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/NASA-Acres-Climate-Resilience-Network.html
-          - text: "Lesson 2: Exploring ICIS-AIR, TRI, SVI, and Health Outcomes"
-            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-air-quality/m202-svi-tri-icis-places.html
-          - text: "Lesson 3: EJScreen: Environmental Justice Screening and Mapping Tool"
-            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-air-quality/m203-ejscreen.html
-          - text: "Lesson 4: Measuring Particulate Matter in countires and socioeconomic strata"
-            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-air-quality/m204-grdiv1-pm25.html
+          - text: "Lesson 1: Human Exposure to Heat Stress"
+            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m401-human-exposure-heat.html
+          - text: "Lesson 4: NASA Acres and Climate Resilience Network"
+            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m404-nasa-acres-climate-resilience-network.html
          
     tools:
       - icon: github
