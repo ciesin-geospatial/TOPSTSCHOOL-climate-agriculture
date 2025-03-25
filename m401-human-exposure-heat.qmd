@@ -13,10 +13,14 @@ In this bite-size lesson, you will use Google Earth Engine to look at data from 
 ## Learning Objectives
 
 After completing this lesson, you should be able to: 
-- Search for and import data into the Google Earth Engine Code Editor 
-- Subset data in Google Earth Engine 
-- Understand how to use cloud assets 
-- Visualize the relationship between temperature change and social vulnerability using scatter plots
+
+-   Search for and import data into the Google Earth Engine Code Editor 
+
+-   Subset data in Google Earth Engine 
+
+-   Understand how to use cloud assets 
+
+-   Visualize the relationship between temperature change and social vulnerability using scatter plots
 
 ## Introduction
 
@@ -76,7 +80,7 @@ For this lesson, we will import each dataset and clean the data before importing
 
 [Launch the Code Editor ↗](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)
 
-```{js}
+```{javascript}
 //Note: In Google Earth Engine, we can use ‘//’ to write notes without having it impact our code. The Code Editor will ignore whatever is written after ‘//’
 
 //Import Daymet dataset for 2023: Daily Surface Weather and Climatological Summaries

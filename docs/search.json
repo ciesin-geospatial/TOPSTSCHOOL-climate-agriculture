@@ -137,7 +137,7 @@
     "href": "m401-human-exposure-heat.html#learning-objectives",
     "title": "Understanding Human Exposure to Heat",
     "section": "Learning Objectives",
-    "text": "Learning Objectives\nAfter completing this lesson, you should be able to: - Search for and import data into the Google Earth Engine Code Editor - Subset data in Google Earth Engine - Understand how to use cloud assets - Visualize the relationship between temperature change and social vulnerability using scatter plots"
+    "text": "Learning Objectives\nAfter completing this lesson, you should be able to:\n\nSearch for and import data into the Google Earth Engine Code Editor\nSubset data in Google Earth Engine\nUnderstand how to use cloud assets\nVisualize the relationship between temperature change and social vulnerability using scatter plots"
   },
   {
     "objectID": "m401-human-exposure-heat.html#introduction",
