@@ -1,0 +1,143 @@
+---
+title: "Flash Drought Multi-Indicator Analysis: Educational R Workflow"
+format: html
+author: "Josh Brinks"
+date: "April 1, 2025"
+---
+
+## Research Priority Context
+
+Flash drought has emerged as a critical research priority for NOAA, NIDIS (National Integrated Drought Information System), and the broader meteorological community. Unlike conventional droughts that develop over months or years, flash droughts are characterized by their unusually rapid intensification over periods of days to weeks, often catching stakeholders unprepared and resulting in disproportionate impacts.
+
+The National Integrated Drought Information System (NIDIS) has specifically identified flash drought as a key research priority in their strategic plans, recognizing significant gaps in our ability to monitor, predict, and communicate these events. According to NIDIS, flash droughts pose unique challenges due to:
+
+1. Their rapid development that outpaces traditional drought monitoring cycles
+
+2. Current monitoring systems not optimized for rapid-onset conditions
+
+3. Limited subseasonal prediction capabilities for these events
+
+4. Difficulty in effectively communicating risk when conditions deteriorate rapidly
+
+
+NOAA has emphasized developing improved early warning systems for flash drought, particularly in agriculturally sensitive regions where economic impacts can be substantial. The importance of multi-indicator approaches has been highlighted as essential for capturing the complex and rapid evolution of these events.
+
+## Overview
+
+This educational workflow analyzes the 2022 flash drought events in the south-central United States (Oklahoma, Arkansas, and Missouri) that severely impacted agricultural systems, particularly pasturelands and livestock operations. Students will learn to work with multiple drought indicators to understand rapid drought intensification and its agricultural impacts. The workflow demonstrates cutting-edge approaches aligning with NIDIS and NOAA research priorities for improving flash drought monitoring, understanding, and impact assessment.
+
+## Use Case
+
+The 2022 south-central US experienced a rare phenomenon of two consecutive flash drought events (June-July and August-September) separated by a recovery period. This led to severe agricultural impacts including:
+- Rapid decline in pastureland conditions
+- Forced livestock selloffs
+- 12% reduction in Oklahoma's cattle population
+- Hydrological impacts affecting the Mississippi River
+
+This provides an excellent case study for multi-indicator flash drought analysis with clear agricultural relevance.
+
+## Learning Objectives
+
+1. Process and analyze multiple flash drought indicators
+2. Examine temporal relationships between different indicators
+3. Explore spatial patterns of flash drought development
+4. Connect meteorological conditions to agricultural impacts
+5. Evaluate the unique characteristics of rapid drought intensification
+6. Understand why flash drought research is an emerging priority in drought science
+7. Develop skills relevant to NIDIS and NOAA research initiatives in flash drought
+8. Recognize the distinctive monitoring challenges flash droughts present compared to conventional droughts
+
+## Dataset Description
+
+- **SPORT-LIS soil moisture**: Daily 4km resolution root zone soil moisture (primary dataset)
+- **GOES-LST**: Land surface temperature at 2km resolution
+- **RTMA air temperature**: 2.5km resolution air temperature analysis
+- **OpenET**: Ensemble evapotranspiration estimates
+- **MODIS NDVI**: 16-day vegetation health indicators
+- **USDA pasture conditions**: Weekly agricultural impact assessments
+
+## Workflow Outline
+
+### Part 1: Data Acquisition and Preparation
+1. Define study area (Oklahoma, Arkansas, Missouri)
+2. Set study time period (May-October 2022)
+3. Download and import datasets
+4. Standardize spatial extent and resolution
+5. Create time series of domain-averaged values
+
+### Part 2: Flash Drought Identification and Analysis
+1. Calculate soil moisture percentiles and anomalies
+2. Identify rapid intensification periods
+3. Examine temperature patterns during flash drought development
+4. Analyze evapotranspiration response
+5. Quantify vegetation impacts through NDVI changes
+
+### Part 3: Multi-Indicator Relationship Analysis
+1. Create time series plots of multiple indicators
+2. Examine lead/lag relationships between indicators
+3. Identify key thresholds for agricultural impacts
+4. Compare first and second flash drought events
+5. Analyze recovery period characteristics
+
+### Part 4: Spatial Analysis
+1. Create maps of drought intensification rates
+2. Compare spatial patterns across indicators
+3. Identify agricultural hotspots most severely impacted
+4. Examine differences in land cover response
+
+### Part 5: Agricultural Impact Assessment
+1. Analyze pasture condition reports
+2. Correlate soil moisture with pasture conditions
+3. Examine temporal lags between drought and impacts
+4. Evaluate economic implications where data available
+
+## Technical Approach
+
+This workflow will use line-by-line scripted code rather than functions or iterations, allowing students to inspect environment objects at each step. The focus will be on:
+
+1. Clear, well-commented code for each data processing step
+2. Straightforward visualizations showing relationships
+3. Full state-level analysis rather than smaller subregions
+4. Step-by-step building of analytical skills
+5. Emphasis on agricultural interpretation of results
+
+The workflow adopts methodologies aligned with NIDIS Flash Drought initiatives, including:
+- Multi-indicator monitoring approaches highlighted in NIDIS workshops
+- Integration of both meteorological and agricultural metrics
+- Analysis timescales appropriate for capturing rapid intensification
+- Emphasis on impact-focused drought assessment
+- Techniques that could contribute to improved early warning systems
+
+## Expected Outcomes
+
+Students will develop a comprehensive understanding of:
+1. How flash droughts differ from conventional droughts
+2. Why multi-indicator approaches are valuable
+3. The sequence of physical processes during flash drought development
+4. How agricultural impacts manifest during rapid drought intensification
+5. The importance of temporal resolution in drought monitoring
+6. Current limitations in flash drought monitoring and prediction
+7. The role of interdisciplinary approaches in drought science
+8. How this research aligns with national drought resilience initiatives
+
+## Extensions (If Time Allows)
+
+1. Compare with a conventional drought event
+2. Explore teleconnections that may have contributed to these events
+3. Analyze heatwave-drought feedbacks
+4. Examine predictability of these events using S2S models
+5. Develop simple impact forecasting model
+6. Create a flash drought early warning framework
+7. Analyze flash drought economic impact estimation approaches
+8. Explore connections to NIDIS Drought Early Warning Systems
+
+## Relevance to National Initiatives
+
+This educational workflow directly supports several national drought science priorities:
+
+1. **NIDIS Flash Drought Working Group objectives** - Enhancing understanding of flash drought dynamics and improving monitoring capabilities
+2. **NOAA Subseasonal-to-Seasonal (S2S) Prediction Initiative** - Supporting improved prediction of extreme events including flash droughts
+3. **USDA Climate Hubs** - Providing practical knowledge for agricultural adaptation to rapid-onset climate extremes
+4. **National Climate Assessment** - Contributing to understanding of compound climate extremes and their sectoral impacts
+
+The analytical approaches demonstrated align with recommendations from the NIDIS Flash Drought Workshop series (2017-2022) which emphasized the need for multi-scale, multi-indicator monitoring systems that capture rapid changes in the climate-agriculture nexus.

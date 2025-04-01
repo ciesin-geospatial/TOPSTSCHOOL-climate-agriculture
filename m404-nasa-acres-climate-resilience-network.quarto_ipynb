@@ -145,7 +145,7 @@
         "\n",
         "The primary tool we are using is Python. Python is used to take large quantities of data and help users define and derive stories from that data. The installation depends on the method you are using. For Google Colab, you must install rasterio (a substantial raster library) and import the following libraries.\n"
       ],
-      "id": "eebeea6f"
+      "id": "3ad1728b"
     },
     {
       "cell_type": "code",
@@ -203,7 +203,7 @@
         "# Display graphical interfaces\n",
         "from IPython.display import display"
       ],
-      "id": "430f15c4",
+      "id": "d1aec879",
       "execution_count": null,
       "outputs": []
     },
@@ -219,7 +219,7 @@
         "\n",
         "NASA Earth data requires a data pull request, this takes time to 'order', we can run this now to give the program time to gather the data we are requesting. **This code chunk is used for local downloads if you have not yet downloaded data**:\n"
       ],
-      "id": "b4eaef13"
+      "id": "77522e97"
     },
     {
       "cell_type": "code",
@@ -236,7 +236,7 @@
         "## If you wish to use another county, download, and path to the other county geojson file\n",
         "county_path = 'data/Talbot_County.geojson' # Path to county"
       ],
-      "id": "ea9ea22b",
+      "id": "77acfaa4",
       "execution_count": null,
       "outputs": []
     },
@@ -255,7 +255,7 @@
         "## If you wish to use another county, download, and path to the other county geojson file\n",
         "county_path = 'data/Talbot_County.geojson' # Path to county"
       ],
-      "id": "908c720b",
+      "id": "db6c0d8c",
       "execution_count": null,
       "outputs": []
     },
@@ -270,7 +270,7 @@
         "\n",
         "year = 2018 # Year of interest"
       ],
-      "id": "d5d47f89",
+      "id": "319f8214",
       "execution_count": null,
       "outputs": []
     },
@@ -282,7 +282,7 @@
         "\n",
         "Accessing data directly from the NASA Earthdata Cloud APPEEARS website requires to make a request with your Earthdata Username and Password. This request generates a **token**:"
       ],
-      "id": "4960cde7"
+      "id": "457a2c7e"
     },
     {
       "cell_type": "code",
@@ -291,7 +291,7 @@
         "# Get the token from your Earth Data account\n",
         "token = requests.post('https://appeears.earthdatacloud.nasa.gov/api/login',auth=(USERNAME, PASSWORD)).json()['token']"
       ],
-      "id": "b4b3fa6c",
+      "id": "38b494e1",
       "execution_count": null,
       "outputs": []
     },
@@ -301,7 +301,7 @@
       "source": [
         "With the token, you can create an APPEEARS task that requests a data package. An email is sent to you with confirmation and updates on your request.  NOTE: This requrest may take a few hours to be filled.\n"
       ],
-      "id": "79657158"
+      "id": "c8df13de"
     },
     {
       "cell_type": "code",
@@ -328,7 +328,7 @@
         "\n",
         "# task_id = requests.post('https://appeears.earthdatacloud.nasa.gov/api/task',json=task,headers={'Authorization': f'Bearer {token}'}).json()"
       ],
-      "id": "60c8fe2a",
+      "id": "0e908aad",
       "execution_count": null,
       "outputs": []
     },
@@ -338,7 +338,7 @@
       "source": [
         "You should receive an email from APPEEARS that says the task has started. \n"
       ],
-      "id": "df3717d6"
+      "id": "7d0bfa44"
     },
     {
       "cell_type": "code",
@@ -352,7 +352,7 @@
         "task_id['task_id'] = 'f7f2bc1b-46bc-4d5d-9421-74e165b576ed'\n",
         "task_id['status'] = 'done'"
       ],
-      "id": "feb312c7",
+      "id": "52a7280c",
       "execution_count": null,
       "outputs": []
     },
@@ -366,7 +366,7 @@
         "\n",
         "There are two ways to display information: vectors (points, lines, polygons) or rasters. Rasters are continuous sheets that are layered across a space; they are made up of pixels. Each pixel represents the ground beneath it. For example, if a raster pixel is 30 by 30 meters, that means a single pixel represents 30 by 30 meters on the ground.\n"
       ],
-      "id": "e0795150"
+      "id": "aa9a8ed6"
     },
     {
       "cell_type": "code",
@@ -387,7 +387,7 @@
         "cdl_meta = cdl_data.meta\n",
         "data = cdl_data.read(1)"
       ],
-      "id": "acfee4e8",
+      "id": "2603f57b",
       "execution_count": null,
       "outputs": []
     },
@@ -398,7 +398,7 @@
         "### Displaying Raster Data\n",
         "MISSING TEXT\n"
       ],
-      "id": "327480b7"
+      "id": "63aa9599"
     },
     {
       "cell_type": "code",
@@ -427,7 +427,7 @@
         "folium.LayerControl().add_to(m)\n",
         "display(m)"
       ],
-      "id": "cfad0485",
+      "id": "247a009e",
       "execution_count": null,
       "outputs": []
     },
@@ -445,7 +445,7 @@
         "\n",
         "![](images/nearest_neighbor.png)\n"
       ],
-      "id": "ce39c65d"
+      "id": "a52fc91f"
     },
     {
       "cell_type": "code",
@@ -495,7 +495,7 @@
         "    # Return both the reprojected data and the updated metadata\n",
         "    return dst_data, dst_kwargs"
       ],
-      "id": "6b128c3b",
+      "id": "b1111666",
       "execution_count": null,
       "outputs": []
     },
@@ -511,7 +511,7 @@
         "\n",
         "This view provides insight into the common commodities that are grown in Maryland in the desired year.\n"
       ],
-      "id": "c7735888"
+      "id": "a36878d1"
     },
     {
       "cell_type": "code",
@@ -519,7 +519,7 @@
       "source": [
         "cdl_reprojected, cdl_meta_reprojected = reproject_raster(cdl_data, cdl_meta['crs'], cdl_meta['transform'], 'EPSG:4326')"
       ],
-      "id": "995c374f",
+      "id": "370bfddf",
       "execution_count": null,
       "outputs": []
     },
@@ -531,7 +531,7 @@
         "\n",
         "Amazon AWS S3 Bucket - Cloud Access to the data:"
       ],
-      "id": "418ab83b"
+      "id": "f80f7592"
     },
     {
       "cell_type": "code",
@@ -556,7 +556,7 @@
         "        'EPSG:4326'\n",
         "    )"
       ],
-      "id": "4d4cf2f0",
+      "id": "e284f11d",
       "execution_count": null,
       "outputs": []
     },
@@ -566,7 +566,7 @@
       "source": [
         "If you've downloaded the data locally:"
       ],
-      "id": "9a3de8da"
+      "id": "f4720993"
     },
     {
       "cell_type": "code",
@@ -587,7 +587,7 @@
         "#         slr_meta['transform'],\n",
         "#         'EPSG:4326')"
       ],
-      "id": "fcb93c0c",
+      "id": "4a9e6795",
       "execution_count": null,
       "outputs": []
     },
@@ -599,7 +599,7 @@
         "\n",
         "You should have received an email from APPEEARS letting you know your task has completed. If you have not received this, go to the APPEEARS website to view the progress by clicking on the explore tab and viewing the TALBOT_COUNTY request.\n"
       ],
-      "id": "2563041c"
+      "id": "9ac2494b"
     },
     {
       "cell_type": "code",
@@ -615,7 +615,7 @@
         "              target_date = start_date + timedelta(days=day_of_year - 1) # add the DOY of acquisition to the year\n",
         "              return target_date.strftime('%m-%d-%Y') ## return proper formatting"
       ],
-      "id": "4d1468e0",
+      "id": "b40e74a2",
       "execution_count": null,
       "outputs": []
     },
@@ -625,7 +625,7 @@
       "source": [
         "The token and Task ID created previously for APPEEARS can be used here to create a 'bundle' which carries multiple datasets from APPEEARS"
       ],
-      "id": "967b952c"
+      "id": "7c49d95c"
     },
     {
       "cell_type": "code",
@@ -635,7 +635,7 @@
         "QA_data = {}\n",
         "data = {} # Create an empty dictionary to collect the data from appeears"
       ],
-      "id": "a250af54",
+      "id": "d4f8106f",
       "execution_count": null,
       "outputs": []
     },
@@ -703,7 +703,7 @@
         "    else:\n",
         "      continue\n"
       ],
-      "id": "dcd0d759",
+      "id": "0c832f11",
       "execution_count": null,
       "outputs": []
     },
@@ -713,7 +713,7 @@
       "source": [
         "Extract some of the data into variables"
       ],
-      "id": "be4a1481"
+      "id": "511f011a"
     },
     {
       "cell_type": "code",
@@ -733,7 +733,7 @@
         "ndvi = (nir - red) / denominator  # Compute NDVI safely\n",
         "ndvi = np.nan_to_num(ndvi, nan=0)\n"
       ],
-      "id": "eb959011",
+      "id": "bf094fa2",
       "execution_count": null,
       "outputs": []
     },
@@ -745,7 +745,7 @@
         "\n",
         "![](images/PixelQA.png)\n"
       ],
-      "id": "d02ecd78"
+      "id": "bc6f2f9e"
     },
     {
       "cell_type": "code",
@@ -754,7 +754,7 @@
         "qa_flags_to_mask = [21824, 21890, 21952, 22018, 22146, 22208] ## These are the values that indicate the higher quality of pixel\n",
         "masked_ndvi = np.where(np.isin(qa_flags, qa_flags_to_mask), np.nan, ndvi) # filter the NDVI array"
       ],
-      "id": "3298cfd7",
+      "id": "bb18abfa",
       "execution_count": null,
       "outputs": []
     },
@@ -805,7 +805,7 @@
         "print(\"Original SLR shape:\", slr_reprojected.shape)\n",
         "print(\"Resampled SLR shape:\", slr_resampled.shape)"
       ],
-      "id": "7a1d9a77",
+      "id": "399387bf",
       "execution_count": null,
       "outputs": []
     },
@@ -815,7 +815,7 @@
       "source": [
         "This code places both rasters on the same map. We first select only corn (where the CDL value is equal to 1). Look on the CDL website if you are interested in other land classes.\n"
       ],
-      "id": "a63f5948"
+      "id": "c9ffacce"
     },
     {
       "cell_type": "code",
@@ -833,7 +833,7 @@
         "plt.tight_layout()\n",
         "plt.show()"
       ],
-      "id": "f4f3b248",
+      "id": "3c2e0997",
       "execution_count": null,
       "outputs": []
     },
@@ -858,7 +858,7 @@
         "corn_area_acres = np.sum(corn_mask) * pixel_area_acres\n",
         "print(f\"Total acres of corn: {corn_area_acres:.2f}\")"
       ],
-      "id": "814e24a2",
+      "id": "fd30e7dc",
       "execution_count": null,
       "outputs": []
     },
@@ -870,7 +870,7 @@
         "\n",
         "#### Graphically view the changes in NDVI.\n"
       ],
-      "id": "cd735ec6"
+      "id": "644700af"
     },
     {
       "cell_type": "code",
@@ -887,7 +887,7 @@
         "masked_ndvi_below_water = np.where(corn_below_water_mask, masked_ndvi, np.nan)\n",
         "masked_ndvi_above_water = np.where(corn_above_water_mask, masked_ndvi, np.nan)"
       ],
-      "id": "b3d6b8e9",
+      "id": "10dd2130",
       "execution_count": null,
       "outputs": []
     },
@@ -956,7 +956,7 @@
         "    for stat in ['mean', 'max']:\n",
         "        print(f\"{stat.capitalize()} NDVI: {ndvi_analysis[condition][stat]}\")"
       ],
-      "id": "cf2b34bf",
+      "id": "76047e8a",
       "execution_count": null,
       "outputs": []
     },
@@ -968,7 +968,7 @@
         "\n",
         "We can see that the corn predicted to be below water in 2050 is already showing signs of decreased NDVI values. As the sea level continues to rise and salinization impacts farmers, what are the future conditions for corn growing in Maryland? What are the estimated impacts? What can we do?\n"
       ],
-      "id": "87e8fc9d"
+      "id": "6e762699"
     },
     {
       "cell_type": "code",
@@ -1007,7 +1007,7 @@
         "print(\"2. Understanding climate change impacts on crop productivity\")\n",
         "print(\"3. Developing adaptive strategies for coastal agricultural communities\")"
       ],
-      "id": "abbb2568",
+      "id": "6ab42b52",
       "execution_count": null,
       "outputs": []
     },
@@ -1031,7 +1031,7 @@
         "\n",
         "If you want to download the tifs you created, you can do so here.\n"
       ],
-      "id": "9e17ef65"
+      "id": "31023c3c"
     },
     {
       "cell_type": "code",
@@ -1060,7 +1060,7 @@
         "\n",
         "print(f\"Masked SLR saved to: {SLR_output_tif_path}\")"
       ],
-      "id": "9586c825",
+      "id": "eb054a7a",
       "execution_count": null,
       "outputs": []
     },
@@ -1091,7 +1091,7 @@
         "\n",
         "print(f\"Masked SLR saved to: {corn_maskoutput_tif_path}\")"
       ],
-      "id": "35bc8d6e",
+      "id": "c824630c",
       "execution_count": null,
       "outputs": []
     }
@@ -1101,7 +1101,7 @@
       "name": "python3",
       "language": "python",
       "display_name": "Python 3 (ipykernel)",
-      "path": "/Users/christinadeo/Library/Python/3.9/share/jupyter/kernels/python3"
+      "path": "C:\\Users\\jmartine\\AppData\\Local\\ESRI\\conda\\envs\\agsdev\\share\\jupyter\\kernels\\python3"
     }
   },
   "nbformat": 4,
