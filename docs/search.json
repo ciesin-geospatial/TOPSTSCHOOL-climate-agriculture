@@ -1,5 +1,6 @@
 [
   {
+<<<<<<< HEAD
     "objectID": "NASA-Acres-Climate-Resilience-Network.html",
     "href": "NASA-Acres-Climate-Resilience-Network.html",
     "title": "NASA Acres and Climate Resilience Network",
@@ -119,6 +120,8 @@
     "text": "Footnotes\n\n\nCredit: NASA Acres↩︎\nPhoto courtesy of Jarrod Miller↩︎\nCourtesy of the authors↩︎"
   },
   {
+=======
+>>>>>>> 25532f8 (updates to authors)
     "objectID": "m401-human-exposure-heat.html",
     "href": "m401-human-exposure-heat.html",
     "title": "Understanding Human Exposure to Heat",
