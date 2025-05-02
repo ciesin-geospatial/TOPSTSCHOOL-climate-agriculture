@@ -48,6 +48,28 @@ Rising global temperatures will also have negative effects on human health. The 
 
 Prolonged exposure and activity in the heat can lead to dangerous heat disorders for humans, and disproportionately impacts vulnerable populations, including children, adults over 65 years old, adults with underlying health conditions, pregnant women, and outdoor workers. The CDC found that in 2023, the warm-season of May through September saw peak heat-related illness emergency visits [@cdc2024]. As climate change causes longer, hotter, and more frequent extreme heat around the world, we can expect to see more heat-related illnesses.
 
+## Setting up your Google Earth Engine Account
+
+Google Earth Engine is free for non-commercial use. In order to access and run the code we will be working with below in the code editor, you must create an account. Upon launching the project (click [here](https://code.earthengine.google.com/6fb536d4819b9d27551094f6ed3a8b52)), you will be prompted with the following message:
+
+![](images/gee1.png){fig-align="center"}
+
+Select "I want to register a project", which will lead you to a welcome page. Here, navigate to the configuration section on the left side.
+
+![](images/gee2.png){fig-align="center"}
+
+In the configuration section, you will be asked to register for commercial use or check if you are eligible for non-commercial use. Get started with registering for a non-commercial account.
+
+![](images/gee3.png){fig-align="center"}
+
+You will be asked to fill out a series of questions. Register as an independent user or how you see fit for your own Google Earth Engine use.
+
+![](images/gee4.png){fig-align="center"}
+
+After submitting, you should find a message that you have been registered for non-commercial use. You will be able to open the project now.
+
+![](images/gee5.png){fig-align="center"}
+
 ## Exploring the Data
 
 ### Daymet V4: Daily Surface Weather and Climatological Summaries

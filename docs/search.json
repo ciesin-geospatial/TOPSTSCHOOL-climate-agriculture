@@ -236,5 +236,12 @@
     "title": "Flash Drought Multi-Indicator Analysis: Educational R Workflow",
     "section": "Relevance to National Initiatives",
     "text": "Relevance to National Initiatives\nThis educational workflow directly supports several national drought science priorities:\n\nNIDIS Flash Drought Working Group objectives - Enhancing understanding of flash drought dynamics and improving monitoring capabilities\nNOAA Subseasonal-to-Seasonal (S2S) Prediction Initiative - Supporting improved prediction of extreme events including flash droughts\nUSDA Climate Hubs - Providing practical knowledge for agricultural adaptation to rapid-onset climate extremes\nNational Climate Assessment - Contributing to understanding of compound climate extremes and their sectoral impacts\n\nThe analytical approaches demonstrated align with recommendations from the NIDIS Flash Drought Workshop series (2017-2022) which emphasized the need for multi-scale, multi-indicator monitoring systems that capture rapid changes in the climate-agriculture nexus."
+  },
+  {
+    "objectID": "m401-human-exposure-heat.html#setting-up-your-google-earth-engine-account",
+    "href": "m401-human-exposure-heat.html#setting-up-your-google-earth-engine-account",
+    "title": "Understanding Human Exposure to Heat",
+    "section": "Setting up your Google Earth Engine Account",
+    "text": "Setting up your Google Earth Engine Account\nGoogle Earth Engine is free for non-commercial use. In order to access and run the code we will be working with below in the code editor, you must create an account. Upon launching the project (click here), you will be prompted with the following message:\n\n\n\n\n\nSelect “I want to register a project”, which will lead you to a welcome page. Here, navigate to the configuration section on the left side.\n\n\n\n\n\nIn the configuration section, you will be asked to register for commercial use or check if you are eligible for non-commercial use. Get started with registering for a non-commercial account.\n\n\n\n\n\nYou will be asked to fill out a series of questions. Register as an independent user or how you see fit for your own Google Earth Engine use.\n\n\n\n\n\nAfter submitting, you should find a message that you have been registered for non-commercial use. You will be able to open the project now."
   }
 ]
