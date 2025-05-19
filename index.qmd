@@ -21,6 +21,9 @@ Teaching earth science topics and coding skills in depth is beyond the scope of 
 
 ## Module 4: Climate and Agriculture datasets and use cases cover:
 
+-   **Module 4 Climate and Agriculture Prerequisites:** General information on the prerequisites and how to make accounts necessary for these modules.
+    -   [Lesson 0: Prerequisites](https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m0-prereq.html)
+
 -   **Understanding Human Exposure to Heat:** This lesson will use Google Earth Engine to analyze temperature and social vulnerability data.
     -   [Lesson 1: Understanding Human Exposure to Heat](https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m401-human-exposure-heat.html)
 
