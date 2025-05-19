@@ -26,6 +26,8 @@ website:
         url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/index.html
       - text: "Lessons"
         menu:
+          - text: "Lesson 0: Climate and Agriculture Prerequisites"
+            url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m400-climate-agriculture-prerequisites.html
           - text: "Lesson 1: Human Exposure to Heat Stress"
             url: https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m401-human-exposure-heat.html
           - text: "Lesson 4: NASA Acres and Climate Resilience Network"
