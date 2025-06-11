@@ -7,8 +7,7 @@ code-block-bg: true
 code-block-border-left: "#315c86"
 format: 
     html
-keep-ipynb: True
-# bibliography: svi-references.bib
+bibliography: m403-references.bib
 ---
 
 ## Overview
@@ -19,16 +18,6 @@ In this lesson, we will explore the 2022 Southern Plains flash drought through a
 ## Programming Environment
 
 This lesson uses the R programming environment and requires several specialized packages for accessing NASA, NOAA, and USDA datasets. Make sure you have the required packages installed and API credentials configured before beginning the analysis.
-:::
-
-::: callout-warning
-## Important: Respectful Analysis of Real-World Impacts
-
-The 2022 Southern Plains flash drought was a real event that caused significant hardship for farming communities, rural economies, and countless families across the affected region. Agricultural producers faced devastating crop losses, livestock stress, and financial difficulties that extended well beyond the drought period itself. Some operations were forced to liquidate herds, abandon planted acres, or exit farming entirely due to the rapid and severe nature of the drought's impacts.
-
-While this lesson provides valuable learning opportunities to understand flash drought processes and connect environmental science to real-world applications, please approach this analysis with appropriate consideration for the human dimensions of these events. The data we examine represents actual agricultural stress, economic losses, and community challenges experienced by real people and places.
-
-When discussing your findings or presenting this work to others, remember that behind every data point are farming families, rural communities, and regional economies that were significantly affected by these extreme conditions. Use this knowledge responsibly and with respect for those who experienced these impacts firsthand.
 :::
 
 ## Learning Objectives
@@ -45,30 +34,48 @@ After completing this lesson, you should be able to:
 - **Analyze spatial patterns** of flash drought development across state and regional scales to understand geographic vulnerability
 - **Connect atmospheric processes to agricultural impacts** through lagged correlation analysis and temporal pattern recognition
 - **Apply professional data management practices** including API authentication, environmental variable management, and reproducible workflow development
-## Setup and Package Loading
 
-```{r}
-# Load required packages for flash drought analysis
-library(tidycensus)     # US Census boundaries and demographic data
-library(sf)             # Spatial data handling and operations  
-library(terra)          # Raster data processing and analysis
-library(earthdatalogin) # NASA Earthdata authentication
-library(rnassqs)        # USDA agricultural survey data access
-library(dplyr)          # Data manipulation and filtering
-library(ggplot2)        # Data visualization and plotting
-library(lubridate)      # Date and time handling
-library(RColorBrewer)   # Color palettes for data visualization
-```
+::: callout-warning
+## Important: Respectful Analysis of Real-World Impacts
+
+The 2022 Southern Plains flash drought was a real event that caused significant hardship for farming communities, rural economies, and countless families across the affected region. Agricultural producers faced devastating crop losses, livestock stress, and financial difficulties that extended well beyond the drought period itself. Some operations were forced to liquidate herds, abandon planted acres, or exit farming entirely due to the rapid and severe nature of the drought's impacts.
+
+While this lesson provides valuable learning opportunities to understand flash drought processes and connect environmental science to real-world applications, please approach this analysis with appropriate consideration for the human dimensions of these events. The data we examine represents actual agricultural stress, economic losses, and community challenges experienced by real people and places.
+
+When discussing your findings or presenting this work to others, remember that behind every data point are farming families, rural communities, and regional economies that were significantly affected by these extreme conditions. Use this knowledge responsibly and with respect for those who experienced these impacts firsthand.
+:::
 
 ## Introduction
 
-Flash drought has emerged as a critical research priority for NOAA, the National Integrated Drought Information System (NIDIS), and the broader meteorological community due to its rapid onset and disproportionate impacts on unprepared stakeholders. Unlike conventional droughts that develop gradually over months or years, flash droughts are characterized by their unusually rapid intensification over periods of days to weeks, often catching agricultural communities, water managers, and emergency planners with insufficient time to implement effective mitigation strategies. The 2022 Southern Plains flash drought exemplified these characteristics, with the U.S. Drought Monitor reporting "one-category-per-week degradation for the last four weeks in a row" as of July 28, 2022—a rate of intensification described as "lightning speed" by drought standards affecting an "unusually large area" (Otkin et al., 2022).
+Flash drought has emerged as a critical research priority within the atmospheric sciences community due to its rapid onset and disproportionate impacts on unprepared stakeholders [@Christian2024a]. In the two decades since the term was coined, the scientific community has forged a new paradigm that recognizes flash droughts have distinct dynamics and impacts compared to conventional droughts, moving beyond definitional debates to focus on the triad of rapid onset, drought development, and associated impacts [@Christian2024a].
 
-The 2022 event was fundamentally driven by severe precipitation deficits that were profoundly amplified by extreme heat and large-scale atmospheric teleconnections. Texas recorded its warmest and fourth driest April to July period on record in 2022, with July 2022 marking the hottest July ever recorded for the state—the first time the state-averaged July mean daily maximum temperature surpassed 100°F (NCEI, 2022). Similarly, on July 19, 2022, all Oklahoma Mesonet sites registered temperatures of 103°F or higher simultaneously, an unprecedented occurrence since the network's establishment in the mid-1990s (Drought.gov, 2022). These extreme conditions were exacerbated by persistent La Niña conditions and a negative Pacific Decadal Oscillation, creating what researchers described as a "perfect storm" of atmospheric conditions that severely suppressed precipitation and enhanced temperatures across the Southern Plains. The resulting impacts were catastrophic: Texas alone suffered over $6.4 billion in agricultural losses in 2022, with cotton losses reaching $2.9 billion (Texas Farm Bureau, 2022), and the U.S. cow herd reaching its smallest size since 1961 due to widespread pasture failures and feed shortages (Oklahoma State University Extension, 2025).
+Global analysis has identified the central United States as one of the most active flash drought hotspots worldwide, alongside Brazil, the Sahel, and India [@Christian2021]. Significantly, six of fifteen major study regions experienced statistically significant increases in flash drought frequency during 1980–2015, with climate projections indicating dramatic increases in North America from 32% in 2015 to 49% in 2100 under extreme emissions scenarios [@Christian2021; @Christian2023]. This makes understanding current events like the 2022 Southern Plains flash drought critically important for developing future adaptive capacity.
 
-The National Integrated Drought Information System (NIDIS) plays a crucial role in coordinating drought monitoring, forecasting, and early warning across the United States. Established by Congress in 2006 through the National Integrated Drought Information System Act, NIDIS serves as the nation's integrated approach to drought monitoring and forecasting, bringing together federal, state, and local partnerships to provide decision-makers with the best available information for drought preparedness and mitigation (NIDIS, 2006). The system integrates data from multiple agencies—including NASA's soil moisture monitoring, NOAA's meteorological analyses, and USDA's agricultural impact assessments—into comprehensive drought monitoring products that support everything from farm-level decisions to federal disaster declarations. During the 2022 flash drought, NIDIS coordination enabled rapid assessment and communication of the evolving conditions, helping stakeholders understand the unprecedented speed and severity of the developing crisis.
+The 2022 Southern Plains flash drought exemplified the characteristics that make these events so challenging. Unlike conventional droughts that develop gradually, this event was characterized by unusually rapid intensification over days to weeks, catching stakeholders with insufficient time to implement mitigation strategies [@Otkin2022; @Christian2024]. The U.S. Drought Monitor reported "one-category-per-week degradation for the last four weeks in a row" as of July 28, 2022—a rate described as "lightning speed" affecting an "unusually large area." This rare event actually consisted of two consecutive flash droughts interrupted by brief recovery, spanning summer and early fall across eastern Oklahoma, Arkansas, and southern Missouri.
 
-Open science and freely accessible data portals have become essential for understanding and mitigating drought impacts, enabling researchers, practitioners, and communities to access the real-time information needed for effective response. NASA's Land Information System provides daily soil moisture percentiles through the SPORT-LIS program, NOAA's URMA system delivers high-resolution meteorological analyses, and USDA's NASS database offers comprehensive agricultural survey data—all freely available to support research, education, and operational decision-making. This open data approach democratizes access to critical environmental information, allowing universities, extension services, agricultural consultants, and community organizations to develop locally-relevant analyses and early warning systems. The 2022 flash drought demonstrated both the power and necessity of these open science resources: the rapid pace of the event required immediate access to multiple data streams for understanding the evolving conditions, while the unprecedented nature of the drought highlighted the need for transparent, accessible data to support research into these emerging extreme event patterns.
+::: {.callout-tip style="color: #9f0b64;"}
+#### Drought in the News
+
+**Europe Faces Rising Drought Concerns as May 2025 Becomes World's Second Hottest on Record**
+
+![](https://plus.unsplash.com/premium_photo-1669387727352-b29e094a1759?q=80&w=1228&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
+
+May 2025 was the world's second warmest May ever recorded, with an average global temperature of 15.79°C—0.53°C above the 1991-2020 average and 1.4°C above pre-industrial levels. The record heat has brought severe drought conditions to much of northwestern Europe, with more than half of Europe and the Mediterranean basin facing some form of drought during May 11-20—the highest level recorded for that time period since monitoring began in 2012.
+
+The drought impacts are already severe: northern European farmers report crop failures due to the driest spring in over a century, Germany experienced its driest March on record, and the Rhine River in Cologne dropped to 1.54 meters—about half its usual level. The European Central Bank warns that water scarcity now puts nearly 15% of the eurozone's economic output at risk.
+
+Northwestern Europe experienced its lowest precipitation and soil moisture levels since at least 1979, while persistent dry conditions have led to the lowest spring river flows across Europe since records began in 1992. The situation demonstrates how rapidly extreme drought conditions can develop and spread across entire continents, highlighting the increasing global challenge of flash drought events in a warming climate.
+
+*Source: [Euronews, June 11, 2025](https://www.euronews.com/green/2025/06/11/world-sees-second-hottest-may-on-record-as-europe-faces-rising-drought-concerns)*
+:::
+
+The 2022 event was driven by severe precipitation deficits amplified by extreme heat and large-scale atmospheric teleconnections. Texas recorded its warmest and fourth driest April to July period on record, with July 2022 marking the hottest July ever recorded—the first time the state-averaged July mean daily maximum temperature surpassed 100°F [@2023b]. These conditions, exacerbated by persistent La Niña and negative Pacific Decadal Oscillation, created a "perfect storm" that severely suppressed precipitation and enhanced temperatures. The resulting impacts were catastrophic: Texas alone suffered over $6.4 billion in agricultural losses, with the U.S. cow herd reaching its smallest size since 1961 [@Powell2023; @2025].
+
+The National Integrated Drought Information System (NIDIS), established by Congress in 2006, coordinates drought monitoring, forecasting, and early warning across the United States through federal, state, and local partnerships. Recent advances emphasize five critical pillars for flash drought early warning: 1) physically based identification frameworks, 2) comprehensive monitoring capabilities, 3) improved prediction across time scales, 4) impact assessments, and 5) decision-making guidance [@Otkin2022]. However, the 2022 event highlighted prediction challenges, with only 20% and 16% of ensemble forecasts correctly predicting rapid drought development for the two consecutive events [@Christian2024].
+
+Open science and freely accessible data portals have become essential for understanding and mitigating drought impacts. NASA's SPORT-LIS provides daily soil moisture percentiles, NOAA's URMA delivers high-resolution meteorological analyses, and USDA's NASS offers comprehensive agricultural survey data [@White2022; @NationalOceanicAndAtmosphericAdministration2025; @U.S.DepartmentOfAgricultureNationalAgriculturalStatisticsService2025]. This democratizes access to critical environmental information, enabling communities to develop locally-relevant analyses and early warning systems. Critical research gaps remain in understanding atmospheric and oceanic drivers, developing practitioner-tailored detection indices, and improving subseasonal-to-seasonal prediction capabilities [@Christian2024a].
+
+This lesson provides hands-on experience with the operational datasets and analytical methods used to monitor, understand, and predict flash drought events like the 2022 Southern Plains case study. Through systematic analysis of NASA soil moisture data, NOAA meteorological observations, and USDA agricultural surveys, you will learn to integrate multiple Earth system datasets to reveal the connections between atmospheric processes and real-world agricultural impacts. By the end of this lesson, you will have developed practical skills in accessing, processing, and interpreting the same data sources used by operational drought monitoring agencies and research institutions worldwide.
 
 ## Required R Packages
 
@@ -96,6 +103,21 @@ This lesson uses the following R packages for accessing and analyzing flash drou
 Most of these packages are available on CRAN and can be installed using `install.packages()`. The `earthdatalogin` package provides streamlined access to NASA data services, while `tidyterra` offers modern integration between raster analysis and the tidyverse ecosystem. For API access, you'll need to register for credentials with NASA Earthdata and USDA NASS as described in the lesson.
 :::
 
+::: {.callout-tip style="color: #9f0b64;"}
+#### Knowledge Check
+
+What is the primary characteristic that distinguishes flash droughts from conventional droughts?
+
+a) Flash droughts occur only during summer months
+b) Flash droughts develop through unusually rapid intensification over days to weeks
+c) Flash droughts are caused exclusively by high temperatures
+d) Flash droughts only affect agricultural areas
+
+**Answer: b) Flash droughts develop through unusually rapid intensification over days to weeks**
+
+*Explanation: While conventional droughts develop gradually over months or years, flash droughts are characterized by their rapid intensification, often catching stakeholders with insufficient time to implement mitigation strategies.*
+:::
+
 ## Study Region Definition
 
 For our analysis, we'll focus on six south-central states that bore the brunt of the 2022 flash drought: Kansas, Missouri, Oklahoma, Arkansas, Texas, and Louisiana. These states form a natural laboratory for studying flash drought development, as they experienced the full spectrum of impacts—from the initial rapid intensification in Texas and Oklahoma to the broader regional expansion that eventually affected agricultural operations across the entire area.
@@ -110,6 +132,7 @@ study_states <- c("Kansas", "Missouri", "Oklahoma", "Arkansas", "Texas", "Louisi
 Now we'll download the actual state boundary geometries from the US Census Bureau using the tidycensus package.
 
 ```{r}
+#| output: false
 # Get state boundaries using tidycensus
 states_sf <- tidycensus::get_acs(
   geography = "state", 
@@ -119,7 +142,11 @@ states_sf <- tidycensus::get_acs(
 ) |>
   dplyr::filter(NAME %in% study_states) |>
   dplyr::select(state_name = NAME, geometry)
+```
 
+Now we can take a peak at the structure. It's pretty straightforward with *sf* objects. Typically one row per boundary, a name column, possibly other attributes, and then the `geometry` field that holds all the spatial information.
+
+```{r}
 # Examine the structure of our spatial data
 states_sf
 ```
@@ -186,6 +213,8 @@ ggplot2::ggplot() +
   ggplot2::theme_minimal()
 ```
 
+Excellent, all of our states of interest are present and in the proper projected space. We can move on.
+
 ## Timespan Definition
 
 Understanding flash drought requires capturing its defining characteristic: the dramatic speed at which conditions can deteriorate. The 2022 Southern Plains event unfolded like a slow-motion disaster that was actually anything but slow—what typically takes months or years happened in a matter of weeks. Our analysis will span the most critical period from June through October 2022, when the region experienced not just one flash drought, but essentially two back-to-back events separated by brief moments of relief.
@@ -209,8 +238,8 @@ This timeframe tells the complete story: the initial development in June and Jul
 ```{r}
 # Create date sequence for our analysis
 total_days <- length(analysis_period)
-cat("Analysis period:", as.character(analysis_start), "to", as.character(analysis_end))
-cat("\nTotal days in analysis:", total_days)
+cat("Analysis period:", as.character(analysis_start), "to", as.character(analysis_end), "\n",
+    "Total days in analysis:", total_days, "\n")
 ```
 
 ## Data Access and Authentication Setup
@@ -255,9 +284,9 @@ Create a file named `.env` in your project directory with your credentials, then
 dotenv::load_dot_env()
 
 # Verify credentials are loaded (without exposing values)
-cat("EARTHDATA_USERNAME loaded:", !is.na(Sys.getenv("EARTHDATA_USERNAME", unset = NA)))
-cat("\nUSDA_NASS_API loaded:", !is.na(Sys.getenv("USDA_NASS_API", unset = NA)))
-cat("\nAWS_NO_SIGN_REQUEST loaded:", !is.na(Sys.getenv("AWS_NO_SIGN_REQUEST", unset = NA)))
+cat("EARTHDATA_USERNAME loaded:", !is.na(Sys.getenv("EARTHDATA_USERNAME", unset = NA)), "\n",
+    "USDA_NASS_API loaded:", !is.na(Sys.getenv("USDA_NASS_API", unset = NA)), "\n",
+    "AWS_NO_SIGN_REQUEST loaded:", !is.na(Sys.getenv("AWS_NO_SIGN_REQUEST", unset = NA)), "\n")
 ```
 
 ### Data Services We'll Access
@@ -275,39 +304,9 @@ The next sections will demonstrate how to use these credentials to access each d
 
 Soil moisture represents the foundation of agricultural drought—when soils dry out rapidly, crops stress, pastures fail, and rural economies suffer. But measuring soil moisture across vast agricultural regions presents enormous challenges. Traditional ground-based sensors provide precise point measurements but leave huge gaps between monitoring sites, while satellite observations often lack the spatial detail or temporal frequency needed to track the rapid changes characteristic of flash drought.
 
-SPORT-LIS (Short-term Prediction Research and Transition Land Information System) bridges this gap by combining satellite observations, weather data, and sophisticated land surface models to produce daily soil moisture estimates at 3-kilometer resolution across the entire continental United States. The system generates percentiles for numerous hydrological variables including soil moisture at multiple depths, evapotranspiration, runoff, and snow water equivalent. Rather than providing raw soil moisture values, SPORT-LIS delivers percentiles that rank current conditions against decades of historical data—a 10th percentile reading means current soil moisture is drier than 90% of all historical conditions for that location and time of year. 
+SPORT-LIS (Short-term Prediction Research and Transition Land Information System) bridges this gap by combining satellite observations, weather data, and sophisticated land surface models to produce daily soil moisture estimates at 3-kilometer resolution across the entire continental United States [@White2022]. The system generates percentiles for numerous hydrological variables including soil moisture at multiple depths, evapotranspiration, runoff, and snow water equivalent. Rather than providing raw soil moisture values, SPORT-LIS delivers percentiles that rank current conditions against decades of historical data—a 10th percentile reading means current soil moisture is drier than 90% of all historical conditions for that location and time of year. 
 
 For our flash drought analysis, we'll focus specifically on the 0-1 meter soil moisture percentiles, which integrate surface and root zone conditions most relevant to agricultural impacts. This percentile approach makes SPORT-LIS invaluable for drought monitoring because it automatically accounts for seasonal patterns and regional differences, allowing us to quickly identify when and where conditions are becoming unusually dry.
-
-:::: column-margin
-::: {.callout-tip style="color: #5a7a2b;"}
-### Data Review
-
-**SPORT-LIS Technical Specifications:**
-- **Spatial Resolution**: 3 km grid spacing
-- **Temporal Resolution**: Daily analysis
-- **Coverage**: Continental United States (CONUS)
-- **Data Source**: NASA GSFC/SPoRT Program
-- **Update Frequency**: Daily operational system
-- **File Format**: GRIB2 format
-- **Coordinate System**: Geographic (latitude/longitude)
-- **Historical Archive**: Available from 2017-present
-- **Model Framework**: NASA Land Information System (LIS)
-
-**Key Variables Available:**
-- Soil moisture percentiles (0-10cm, 10-40cm, 40-100cm, 0-100cm)
-- Evapotranspiration percentiles
-- Runoff percentiles  
-- Snow water equivalent percentiles
-- Streamflow percentiles
-- Groundwater percentiles
-
-**Percentile Calculation:**
-Based on 20+ year climatology (2000-present) using day-of-year ranking against historical distribution. Percentiles range from 0-100, where values below 20th percentile indicate dry conditions and below 10th percentile indicate severe drought conditions.
-
-**Model Physics**: Integrates satellite observations (soil moisture, precipitation, vegetation) with meteorological forcing data through the Noah-MP land surface model to produce physically consistent hydrological estimates.
-:::
-::::
 
 ### NASA Earthdata Authentication Setup
 
@@ -364,6 +363,40 @@ What really stands out is how sharp the boundaries are - you've got intense drou
 
 Here's what makes this particularly significant: this extreme dryness developed in just 4-6 weeks. Back in early June, much of this red area was showing normal or even above-normal soil moisture. The speed of that transformation - from adequate moisture to record-breaking drought in about a month - is exactly what makes flash drought so challenging for farmers and ranchers who suddenly find themselves dealing with severe conditions with little warning.
 
+::: {.callout-tip style="color: #5a7a2b;"}
+### Data Review
+
+**SPORT-LIS Technical Specifications:**
+<ul>
+<li><strong>Spatial Resolution:</strong> 3 km grid spacing</li>
+<li><strong>Temporal Resolution:</strong> Daily analysis</li>
+<li><strong>Coverage:</strong> Continental United States (CONUS)</li>
+<li><strong>Data Source:</strong> NASA GSFC/SPoRT Program</li>
+<li><strong>Update Frequency:</strong> Daily operational system</li>
+<li><strong>File Format:</strong> GRIB2 format</li>
+<li><strong>Coordinate System:</strong> Geographic (latitude/longitude)</li>
+<li><strong>Historical Archive:</strong> Available from 2017-present</li>
+<li><strong>Model Framework:</strong> NASA Land Information System (LIS)</li>
+</ul>
+
+**Key Variables Available:**
+<ul>
+<li>Soil moisture percentiles (0-10cm, 10-40cm, 40-100cm, 0-100cm)</li>
+<li>Evapotranspiration percentiles</li>
+<li>Runoff percentiles</li>
+<li>Snow water equivalent percentiles</li>
+<li>Streamflow percentiles</li>
+<li>Groundwater percentiles</li>
+</ul>
+
+**Percentile Calculation:**
+Based on 20+ year climatology (2000-present) using day-of-year ranking against historical distribution. Percentiles range from 0-100, where values below 20th percentile indicate dry conditions and below 10th percentile indicate severe drought conditions.
+
+**Model Physics:** Integrates satellite observations (soil moisture, precipitation, vegetation) with meteorological forcing data through the Noah-MP land surface model to produce physically consistent hydrological estimates.
+
+**Citation:** White, K. D., LeRoy, A., Fuell, K. K., Hain, C. & Case, J. L. NASA's Integrated Multi-Satellite Retrievals (IMERG) and NASA SPoRT Land Information System Products for Drought Analysis. in vol. 102 446 (2022).
+:::
+
 ### Systematic Time Series Analysis
 
 Now we'll load soil moisture data for our complete analysis period using a combination of weekly sampling plus key drought event dates. We'll focus on the 0-1m soil layer, which integrates surface and root zone conditions and is most relevant for agricultural impacts.
@@ -385,10 +418,7 @@ all_dates <- sort(unique(c(weekly_dates, key_dates, analysis_end)))
 date_strings <- format(all_dates, "%Y%m%d")
 
 # Display our sampling strategy
-cat("Total analysis dates:", length(all_dates))
-cat("\nKey event dates included:")
-key_date_strings <- format(key_dates, "%Y-%m-%d")
-print(key_date_strings)
+paste("Total analysis dates:", length(all_dates))
 ```
 
 Now we'll construct the URLs for accessing all our analysis dates from the SPORT-LIS archive.
@@ -400,7 +430,7 @@ sport_urls <- sapply(date_strings, function(date_string) {
          date_string, ".grb2")
 })
 
-cat("Total URLs to process:", length(sport_urls))
+paste("Total URLs to process:", length(sport_urls))
 ```
 
 Let's test our approach by loading and processing the first date to establish our workflow before processing all dates.
@@ -413,7 +443,6 @@ first_date_cropped <- terra::crop(first_date, study_extent)
 # Extract only the 0-1m soil layer (layer 3)
 first_date_0to1m <- first_date_cropped[[3]]
 
-cat("Single date structure (0-1m layer):")
 first_date_0to1m
 ```
 
@@ -424,7 +453,6 @@ Now we'll process all dates systematically. This may take several minutes as we'
 soil_rasters <- list()
 days <- names(sport_urls)
 
-cat("Processing: ")
 # Load and process each date
 for (day in days) {
   # Load full raster
@@ -436,7 +464,7 @@ for (day in days) {
   # Store in list
   soil_rasters[[day]] <- temp_raster
   
-  cat("-", day)
+  paste("-", day)
 }
 
 # Combine into single multi-layer raster
@@ -481,8 +509,6 @@ soil_moisture_palette <- c(
   "#4169E1",  # Medium blue for well above normal
   "#0000FF"   # Dark blue for exceptional moisture
 )
-
-soil_moisture_palette
 ```
 
 For the ggplot2 visualization, we'll select the key drought event dates we defined earlier that represent important phases of the flash drought evolution.
@@ -500,16 +526,13 @@ key_layer_indices <- match(key_date_strings, layer_names)
 available_indices <- key_layer_indices[!is.na(key_layer_indices)]
 available_dates <- key_event_dates[!is.na(key_layer_indices)]
 
-cat("Key dates with available data:")
 for(i in 1:length(available_dates)) {
-  cat("\n", as.character(available_dates[i]), "- Layer", available_indices[i])
+  paste("\n", as.character(available_dates[i]), "- Layer", available_indices[i])
 }
 
 # Extract the key date layers
 key_soil_data <- soil_timeseries[[available_indices]]
-```
 
-```{r}
 # Convert raster to data frame for ggplot2
 soil_df <- tidyterra::as_tibble(key_soil_data, xy = TRUE)
 
@@ -529,7 +552,7 @@ soil_df_long
 
 Now we'll create the ggplot2 visualization with state boundaries and the official drought color palette.
 
-```{r}
+```{r fig.height=8}
 # Create publication-quality map with state boundaries
 ggplot2::ggplot() +
   ggplot2::geom_raster(data = soil_df_long, 
@@ -542,7 +565,7 @@ ggplot2::ggplot() +
     breaks = c(0, 25, 50, 75, 100),
     labels = c("0th\n(Severe Drought)", "25th", "50th\n(Normal)", "75th", "100th\n(Abundant)")
   ) +
-  ggplot2::facet_wrap(~ date_event, ncol = 2) +
+  ggplot2::facet_wrap(~ date_event, ncol = 3) +
   ggplot2::labs(
     title = "2022 Flash Drought Evolution - Key Event Dates",
     subtitle = "Soil Moisture Percentiles (0-1m depth) with Official NIDIS Color Scheme",
@@ -572,7 +595,7 @@ states_sf_reproj <- sf::st_transform(states_sf, terra::crs(soil_timeseries))
 
 Now we'll extract the average soil moisture percentile for each state across all time periods using exactextractr, which provides more accurate area-weighted extraction than simple overlay methods.
 
-```{r}
+```{r message=FALSE}
 # Extract mean soil moisture percentiles for each state across all dates
 state_soil_moisture <- exactextractr::exact_extract(
   soil_timeseries, 
@@ -580,7 +603,8 @@ state_soil_moisture <- exactextractr::exact_extract(
   'mean',
   force_df = TRUE,
   full_colnames = TRUE,
-  append_cols = "state_name"
+  append_cols = "state_name",
+  progress = FALSE
 )
 
 # Examine the structure
@@ -641,8 +665,6 @@ Now we'll prepare the full time series data for visualization by converting the 
 
 ```{r}
 # Convert exactextractr output to long format for ggplot2
-library(tidyr)
-
 # Extract date information from column names and convert the data to long format
 state_timeseries_long <- state_soil_moisture |>
   tidyr::pivot_longer(
@@ -661,7 +683,7 @@ head(state_timeseries_long)
 
 Finally, we'll create a time series plot showing how soil moisture percentiles changed in each state throughout the 2022 flash drought period.
 
-```{r}
+```{r fig.height=7}
 # Create time series plot of state-level soil moisture
 ggplot2::ggplot(state_timeseries_long, ggplot2::aes(x = date, y = soil_moisture_percentile, color = state)) +
   ggplot2::geom_line(size = 1.2, alpha = 0.8) +
@@ -684,7 +706,7 @@ ggplot2::ggplot(state_timeseries_long, ggplot2::aes(x = date, y = soil_moisture_
   ) +
   ggplot2::labs(
     title = "State-Level Soil Moisture Percentiles During 2022 Flash Drought",
-    subtitle = "Dashed lines show approximate drought category thresholds (D0: 20th, D1: 10th, D2: 5th, D3: 2nd percentile)",
+    subtitle = "Dashed lines approximate NIDIS thresholds (D0: 20th, D1: 10th, D2: 5th, D3: 2nd %)",
     caption = "Source: NASA SPORT-LIS soil moisture percentiles (0-1m depth)"
   ) +
   ggplot2::theme_minimal() +
@@ -699,6 +721,21 @@ This state-level analysis reveals how the flash drought progressed differently a
 
 What's particularly interesting is the timing differences - you can see that some states began recovering in August while others continued to deteriorate. Louisiana and Arkansas show more variability and generally less severe impacts, likely due to their geographic position and different climate patterns. The dashed reference lines help put these percentiles in context - when a state drops below the 20th percentile line, agricultural stress typically becomes noticeable, and conditions below the 10th percentile often trigger drought emergency responses. This visualization clearly shows why the 2022 event was so challenging for agricultural communities, with multiple states experiencing prolonged periods well below these critical thresholds.
 
+::: {.callout-tip style="color: #9f0b64;"}
+#### Knowledge Check
+
+When SPORT-LIS shows soil moisture at the 5th percentile, this means:
+
+a) Soil moisture is 5% of its maximum possible value
+b) Current soil moisture is drier than 95% of all historical conditions for that location and time of year
+c) There is a 5% chance of drought conditions
+d) Soil moisture has decreased by 5% from the previous day
+
+**Answer: b) Current soil moisture is drier than 95% of all historical conditions for that location and time of year**
+
+*Explanation: SPORT-LIS percentiles rank current conditions against decades of historical data. A 5th percentile reading means current soil moisture is drier than 95% of all historical conditions, indicating severe drought stress.*
+:::
+
 ## URMA Meteorological Data
 
 While soil moisture tells us what happened during the 2022 flash drought, understanding why it happened requires examining the atmospheric conditions that drove such rapid soil drying. Think of it this way: soil moisture is the victim, but the atmosphere is the culprit. To build a complete picture of flash drought development, we need to investigate the meteorological "crime scene"—the combination of temperature, humidity, wind, and radiation that created the perfect storm for rapid moisture loss.
@@ -707,7 +744,7 @@ The challenge is that weather observations from individual stations can miss imp
 
 ### How URMA Creates a Complete Picture
 
-URMA combines observations from thousands of surface weather stations, automated weather stations, and other observing platforms across the continental United States, then uses sophisticated atmospheric models to create continuous, gridded meteorological fields at 2.5-kilometer resolution. Think of it as taking scattered puzzle pieces (individual weather observations) and filling in the missing pieces to create a complete picture of atmospheric conditions every hour of every day.
+URMA combines observations from thousands of surface weather stations, automated weather stations, and other observing platforms across the continental United States, then uses sophisticated atmospheric models to create continuous, gridded meteorological fields at 2.5-kilometer resolution [@NationalOceanicAndAtmosphericAdministration2025]. Think of it as taking scattered puzzle pieces (individual weather observations) and filling in the missing pieces to create a complete picture of atmospheric conditions every hour of every day.
 
 This matters enormously for flash drought research because the atmospheric drivers often vary significantly over short distances. A weather front might bring relief to one county while leaving the next county baking under clear skies. URMA captures these spatial patterns with the resolution needed to understand how meteorological conditions varied across our six-state study region during the critical summer of 2022.
 
@@ -727,34 +764,6 @@ Flash droughts develop when the atmosphere becomes exceptionally "thirsty"—whe
 
 When these variables align—hot temperatures, low humidity, strong winds, clear skies, and no rain—they create conditions where potential evapotranspiration far exceeds water availability. This is exactly what happened across the Southern Plains in summer 2022, and URMA data allows us to track how these conditions developed and intensified with unprecedented spatial and temporal detail.
 
-:::: column-margin
-::: {.callout-tip style="color: #5a7a2b;"}
-### Data Review
-
-**URMA Technical Specifications:**
-- **Spatial Resolution**: 2.5 km grid spacing
-- **Temporal Resolution**: Hourly analysis
-- **Coverage**: Continental United States (CONUS)
-- **Data Source**: NOAA/National Weather Service
-- **Update Frequency**: Real-time operational system
-- **Variables**: 40+ meteorological parameters including temperature, humidity, wind, pressure, precipitation
-- **File Format**: GRIB2 format on AWS cloud storage
-- **Coordinate System**: Lambert Conformal Conic projection
-- **Historical Archive**: Available from 2006-present
-- **Quality Control**: Multi-stage validation using observation networks
-
-**Key Variables for Flash Drought Analysis:**
-- 2-meter temperature (°C)
-- 2-meter dew point temperature (°C) 
-- 10-meter wind speed (m/s)
-- Surface pressure (Pa)
-- Accumulated precipitation (mm)
-- Downward shortwave radiation (W/m²)
-
-URMA uses optimal interpolation techniques to blend observations from ~20,000 surface stations with first-guess fields from numerical weather models, creating a spatially complete analysis that's updated every hour.
-:::
-::::
-
 ### URMA Data Access
 
 URMA data is freely available through NOAA's AWS cloud infrastructure. While no authentication is required, we do need to set the `AWS_NO_SIGN_REQUEST=YES` environment variable to access the public data bucket without AWS credentials.
@@ -767,12 +776,12 @@ First, let's verify our AWS configuration is set up correctly for accessing the 
 
 ```{r}
 # Verify AWS configuration for public data access
-cat("AWS_NO_SIGN_REQUEST setting:", Sys.getenv("AWS_NO_SIGN_REQUEST"))
+paste("AWS_NO_SIGN_REQUEST setting:", Sys.getenv("AWS_NO_SIGN_REQUEST"))
 
 # If not set, configure it now
 if(Sys.getenv("AWS_NO_SIGN_REQUEST") == "") {
   Sys.setenv(AWS_NO_SIGN_REQUEST = "YES")
-  cat("\nConfigured AWS_NO_SIGN_REQUEST = YES")
+  paste("\nConfigured AWS_NO_SIGN_REQUEST = YES")
 }
 ```
 
@@ -790,12 +799,6 @@ urma_variables <- c(
   "DSWRF_surface",         # Downward shortwave radiation flux (W/m²)
   "APCP_surface"           # Accumulated precipitation (kg/m²)
 )
-
-# Display variables we'll be working with
-cat("URMA variables for flash drought analysis:")
-for(var in urma_variables) {
-  cat("\n", var)
-}
 ```
 
 Now we'll select a representative date to test our data access approach before processing the full time series.
@@ -804,9 +807,6 @@ Now we'll select a representative date to test our data access approach before p
 # Use the same peak drought date from our SPORT-LIS analysis
 test_date <- lubridate::as_date("2022-07-19")
 test_date_string <- format(test_date, "%Y%m%d")
-
-cat("Testing URMA data access for:", as.character(test_date))
-cat("\nFormatted date string:", test_date_string)
 ```
 
 URMA files follow a specific naming convention on the NOAA AWS bucket. The key insight is that all meteorological variables are contained in a single file per hour, making data access much more efficient than initially anticipated.
@@ -827,12 +827,6 @@ strategic_hours <- c("06", "12", "18", "00")  # UTC hours
 #                    Represents peak atmospheric demand and maximum ET conditions
 # 00Z (7pm Central): Evening transition, declining temperature and solar radiation
 #                    Captures the wind-down of daily ET processes
-
-cat("Strategic sampling hours and their meteorological significance:")
-cat("\n06Z (1am Central): Minimum temperature, maximum humidity period")
-cat("\n12Z (7am Central): Morning transition, rising atmospheric demand") 
-cat("\n18Z (1pm Central): Peak temperature, minimum humidity, maximum ET demand")
-cat("\n00Z (7pm Central): Evening transition, declining atmospheric demand")
 ```
 
 
@@ -853,11 +847,6 @@ construct_urma_url <- function(date_string, hour) {
 test_urls <- sapply(strategic_hours, function(hour) {
   construct_urma_url(test_date_string, hour)
 })
-
-cat("Sample URMA URLs for", test_date_string, ":")
-for(i in 1:length(test_urls)) {
-  cat("\n", strategic_hours[i], "Z:", test_urls[i])
-}
 ```
 
 Let's test accessing a single URMA file to examine the available variables and data structure.
@@ -869,8 +858,7 @@ library(terra)
 # Test loading a single URMA file (18Z - typically peak heating period)
 test_url_18z <- construct_urma_url(test_date_string, "18")
 
-cat("Testing data access from:")
-cat("\n", test_url_18z)
+paste("Testing data access from:", test_url_18z)
 
 # Load the URMA raster - this contains all meteorological variables
 urma_test <- terra::rast(test_url_18z)
@@ -880,13 +868,6 @@ urma_test
 Now let's examine the available variables and identify the layers we need for ET calculations.
 
 ```{r}
-# Display all available variables
-cat("Available URMA variables:")
-variable_names <- names(urma_test)
-for(i in 1:length(variable_names)) {
-  cat("\nLayer", i, ":", variable_names[i])
-}
-
 # Identify key variables for ET calculation
 et_variables <- list(
   temperature = 3,      # 2m temperature [C]
@@ -895,12 +876,6 @@ et_variables <- list(
   wind_speed = 9,       # 10m wind speed [m/s]
   pressure = 2          # Surface pressure [Pa]
 )
-
-cat("\n\nKey variables for ET calculation:")
-for(var_name in names(et_variables)) {
-  layer_num <- et_variables[[var_name]]
-  cat("\n", var_name, "- Layer", layer_num, ":", variable_names[layer_num])
-}
 ```
 
 Let's crop the data to our study region and examine the meteorological conditions during peak drought. First, we need to handle the coordinate reference system differences.
@@ -916,9 +891,6 @@ extent_poly_reproj <- terra::project(extent_poly, terra::crs(urma_test))
 
 # Create new extent in URMA projection
 study_extent_urma <- terra::ext(extent_poly_reproj)
-
-cat("\n\nReprojected study extent for URMA data:")
-study_extent_urma
 ```
 
 Now we can properly crop the URMA data to our study region.
@@ -927,14 +899,10 @@ Now we can properly crop the URMA data to our study region.
 # Crop to our reprojected study extent
 urma_cropped <- terra::crop(urma_test, study_extent_urma)
 
-cat("Cropped URMA dimensions:")
-cat("\nOriginal:", dim(urma_test)[1], "x", dim(urma_test)[2], "pixels")
-cat("\nCropped:", dim(urma_cropped)[1], "x", dim(urma_cropped)[2], "pixels")
-
 urma_cropped
 ```
 
-Now let's extract the key meteorological variables for analysis.
+This properly reduced the size. Now let's extract the key meteorological variables for analysis.
 
 ```{r}
 # Extract key variables for visualization
@@ -948,13 +916,13 @@ pressure_18z <- urma_cropped[[et_variables$pressure]]    # Pa
 rh_18z <- 100 * exp((17.625 * dewpoint_18z) / (243.04 + dewpoint_18z)) / 
                exp((17.625 * temp_18z) / (243.04 + temp_18z))
 
-cat("Meteorological conditions on", test_date_string, "at 18Z:")
-cat("\nTemperature - Min:", round(terra::global(temp_18z, "min", na.rm = TRUE)[[1]], 1), "°C")
-cat("  Max:", round(terra::global(temp_18z, "max", na.rm = TRUE)[[1]], 1), "°C")
-cat("\nWind Speed - Min:", round(terra::global(wind_18z, "min", na.rm = TRUE)[[1]], 1), "m/s")
-cat("  Max:", round(terra::global(wind_18z, "max", na.rm = TRUE)[[1]], 1), "m/s")
-cat("\nRelative Humidity - Min:", round(terra::global(rh_18z, "min", na.rm = TRUE)[[1]], 1), "%")
-cat("  Max:", round(terra::global(rh_18z, "max", na.rm = TRUE)[[1]], 1), "%")
+cat("Meteorological conditions on", test_date_string, "at 18Z:\n",
+    "Temperature - Min:", round(terra::global(temp_18z, "min", na.rm = TRUE)[[1]], 1), "°C",
+    " Max:", round(terra::global(temp_18z, "max", na.rm = TRUE)[[1]], 1), "°C\n",
+    "Wind Speed - Min:", round(terra::global(wind_18z, "min", na.rm = TRUE)[[1]], 1), "m/s",
+    " Max:", round(terra::global(wind_18z, "max", na.rm = TRUE)[[1]], 1), "m/s\n",
+    "Relative Humidity - Min:", round(terra::global(rh_18z, "min", na.rm = TRUE)[[1]], 1), "%",
+    " Max:", round(terra::global(rh_18z, "max", na.rm = TRUE)[[1]], 1), "%\n")
 ```
 
 For visualization, we'll need to reproject our state boundaries to match the URMA coordinate system.
@@ -990,11 +958,45 @@ pressure_hpa <- pressure_18z / 100
 terra::plot(pressure_hpa, main = "Surface Pressure (hPa) - 18Z",
             col = RColorBrewer::brewer.pal(9, "Spectral"))
 plot(sf::st_geometry(states_sf_urma), add = TRUE, border = "black", lwd = 0.8)
+```
 
+```{r echo=FALSE}
 par(mfrow = c(1, 1))  # Reset plot layout
 ```
 
 This single URMA file contains all the meteorological variables needed for comprehensive ET calculations, including temperature, humidity, wind, and pressure - the key atmospheric drivers of flash drought conditions. The test data appear to be reasonable and are lined up with our study area. Now we can move on to a more systematic acquisition of all the points on our timeline.
+
+::: {.callout-tip style="color: #5a7a2b;"}
+### Data Review
+
+**URMA Technical Specifications:**
+<ul>
+<li><strong>Spatial Resolution:</strong> 2.5 km grid spacing</li>
+<li><strong>Temporal Resolution:</strong> Hourly analysis</li>
+<li><strong>Coverage:</strong> Continental United States (CONUS)</li>
+<li><strong>Data Source:</strong> NOAA/National Weather Service</li>
+<li><strong>Update Frequency:</strong> Real-time operational system</li>
+<li><strong>Variables:</strong> 40+ meteorological parameters including temperature, humidity, wind, pressure, precipitation</li>
+<li><strong>File Format:</strong> GRIB2 format on AWS cloud storage</li>
+<li><strong>Coordinate System:</strong> Lambert Conformal Conic projection</li>
+<li><strong>Historical Archive:</strong> Available from 2006-present</li>
+<li><strong>Quality Control:</strong> Multi-stage validation using observation networks</li>
+</ul>
+
+**Key Variables for Flash Drought Analysis:**
+<ul>
+<li>2-meter temperature (°C)</li>
+<li>2-meter dew point temperature (°C)</li>
+<li>10-meter wind speed (m/s)</li>
+<li>Surface pressure (Pa)</li>
+<li>Accumulated precipitation (mm)</li>
+<li>Downward shortwave radiation (W/m²)</li>
+</ul>
+
+URMA uses optimal interpolation techniques to blend observations from ~20,000 surface stations with first-guess fields from numerical weather models, creating a spatially complete analysis that's updated every hour.
+
+**Citation:** National Oceanic and Atmospheric Administration. NOAA Real-Time Mesoscale Analysis (RTMA) / Unrestricted Mesoscale Analysis (URMA). (2025).
+:::
 
 ### Systematic URMA Time Series Processing
 
@@ -1013,10 +1015,10 @@ urma_date_strings <- format(urma_dates, "%Y%m%d")
 
 # Create a systematic processing plan
 total_files_needed <- length(urma_dates) * length(strategic_hours)
-cat("URMA processing plan:")
-cat("\nDates to process:", length(urma_dates))
-cat("\nHours per date:", length(strategic_hours))
-cat("\nTotal URMA files to download:", total_files_needed)
+cat("URMA processing plan:\n",
+    "Dates to process:", length(urma_dates), "\n",
+    "Hours per date:", length(strategic_hours), "\n", 
+    "Total URMA files to download:", total_files_needed, "\n")
 ```
 
 We'll organize our processing using a nested approach where each date contains data for all strategic hours. This structure makes it easy to calculate daily aggregates while maintaining access to individual hourly data if needed.
@@ -1034,13 +1036,7 @@ urma_url_plan <- expand.grid(
   )
 
 # Display the processing plan structure
-cat("Processing plan structure:")
 head(urma_url_plan)
-cat("\nSample URLs from different dates:")
-sample_indices <- c(1, 20, 40, nrow(urma_url_plan))
-for(i in sample_indices) {
-  cat("\n", urma_url_plan$date[i], urma_url_plan$hour[i], "Z")
-}
 ```
 
 Now we'll implement the systematic processing loop with progress tracking and error handling. This process downloads each URMA file, crops it to our study region, and extracts the key meteorological variables. Downloading all the required files takes approximately 15 minutes on an above average home pc and a good internet connection. 
@@ -1050,15 +1046,10 @@ Now we'll implement the systematic processing loop with progress tracking and er
 urma_daily_data <- list()
 processing_log <- list()
 
-cat("Starting systematic URMA processing...")
-cat("\nProcessing", length(urma_dates), "dates with", length(strategic_hours), "hours each")
-
 # Process each date
 for(i in 1:length(urma_dates)) {
   current_date <- urma_dates[i]
   current_date_string <- urma_date_strings[i]
-  
-  cat("\nProcessing date", i, "of", length(urma_dates), ":", as.character(current_date))
   
   # Initialize storage for this date
   daily_hourly_data <- list()
@@ -1088,10 +1079,10 @@ for(i in 1:length(urma_dates)) {
       # Store hourly data
       daily_hourly_data[[paste0("hour_", current_hour)]] <- hourly_vars
       
-      cat(" ", current_hour, "Z✓")
+      paste(" ", current_hour, "Z✓")
       
     }, error = function(e) {
-      cat(" ", current_hour, "Z✗")
+      paste(" ", current_hour, "Z✗")
       processing_log[[paste(current_date_string, current_hour, sep = "_")]] <- paste("Error:", e$message)
     })
   }
@@ -1124,15 +1115,10 @@ for(i in 1:length(urma_dates)) {
     # Store daily aggregates
     urma_daily_data[[current_date_string]] <- daily_aggregates
     
-    cat(" → Daily aggregates calculated")
   } else {
-    cat(" → Insufficient data for daily aggregates")
     processing_log[[paste(current_date_string, "daily", sep = "_")]] <- "Insufficient hourly data"
   }
 }
-
-cat("\n\nProcessing complete!")
-cat("\nSuccessfully processed", length(urma_daily_data), "days")
 ```
 
 ### Creating Daily URMA Time Series
@@ -1144,8 +1130,8 @@ With our individual daily aggregates calculated, we need to combine them into ti
 successful_dates <- names(urma_daily_data)
 successful_date_objects <- as.Date(successful_dates, format = "%Y%m%d")
 
-cat("Creating daily time series rasters...")
-cat("\nDates with complete URMA data:", length(successful_dates))
+cat("Creating daily time series rasters...\n",
+    "Dates with complete URMA data:", length(successful_dates), "\n")
 
 # Initialize lists to store time series for each variable
 tmax_list <- list()
@@ -1176,13 +1162,13 @@ urma_wind_series <- terra::rast(wind_list)
 urma_pressure_series <- terra::rast(pressure_list)
 
 # Verify our time series structure
-cat("URMA time series dimensions:")
-cat("\nTmax series:", paste(dim(urma_tmax_series), collapse = " x "))
-cat("\nTmin series:", paste(dim(urma_tmin_series), collapse = " x "))
-cat("\nTmean series:", paste(dim(urma_tmean_series), collapse = " x "))
-cat("\nRelative humidity series:", paste(dim(urma_rh_series), collapse = " x "))
-cat("\nWind speed series:", paste(dim(urma_wind_series), collapse = " x "))
-cat("\nSurface pressure series:", paste(dim(urma_pressure_series), collapse = " x "))
+cat("URMA time series dimensions:\n",
+    "Tmax series:", paste(dim(urma_tmax_series), collapse = " x "), "\n",
+    "Tmin series:", paste(dim(urma_tmin_series), collapse = " x "), "\n",
+    "Tmean series:", paste(dim(urma_tmean_series), collapse = " x "), "\n",
+    "Relative humidity series:", paste(dim(urma_rh_series), collapse = " x "), "\n",
+    "Wind speed series:", paste(dim(urma_wind_series), collapse = " x "), "\n",
+    "Surface pressure series:", paste(dim(urma_pressure_series), collapse = " x "), "\n")
 ```
 
 Let's create visualizations showing how key meteorological variables changed during our analysis period using ggplot2 facets for publication-quality plots with state boundary context.
@@ -1205,7 +1191,7 @@ if(length(available_urma_indices) > 0) {
 
 First, let's examine how maximum temperatures evolved during the flash drought development:
 
-```{r}
+```{r fig.height=6}
 # Plot maximum temperature progression using ggplot2 facets
 if(length(available_urma_indices) > 0) {
   # Convert temperature raster to data frame for ggplot2
@@ -1232,7 +1218,7 @@ if(length(available_urma_indices) > 0) {
       name = "Temperature\n(°C)",
       limits = c(0,50)
     ) +
-    ggplot2::facet_wrap(~ date_event, ncol = 2) +
+    ggplot2::facet_wrap(~ date_event, ncol = 3) +
     ggplot2::labs(
       title = "Maximum Temperature Evolution",
       subtitle = "Daily maximum temperatures showing atmospheric heating",
@@ -1250,7 +1236,7 @@ if(length(available_urma_indices) > 0) {
 
 Next, let's look at how relative humidity patterns changed across the same period:
 
-```{r}
+```{r fig.height=6}
 # Plot relative humidity progression using ggplot2 facets
 if(length(available_urma_indices) > 0) {
   # Convert humidity raster to data frame for ggplot2
@@ -1275,7 +1261,7 @@ if(length(available_urma_indices) > 0) {
       colors = rev(RColorBrewer::brewer.pal(11, "RdYlBu")),
       name = "Relative\nHumidity (%)"
     ) +
-    ggplot2::facet_wrap(~ date_event, ncol = 2) +
+    ggplot2::facet_wrap(~ date_event, ncol = 3) +
     ggplot2::labs(
       title = "Relative Humidity Evolution",
       subtitle = "Daily mean relative humidity showing atmospheric drying",
@@ -1294,6 +1280,21 @@ if(length(available_urma_indices) > 0) {
 These maps clearly show the atmospheric conditions that drove the 2022 flash drought development. The temperature evolution reveals how extreme heat built up across Texas and Oklahoma from June through July, with temperatures reaching 40-50°C (104-122°F) during the peak drought period - conditions that dramatically increased atmospheric demand for water. The relative humidity patterns tell the complementary story of atmospheric drying, with humidity dropping to critically low levels (below 25%) across much of the region during the same peak period. Together, these conditions - scorching temperatures combined with bone-dry air - created the perfect atmospheric recipe for rapidly pulling moisture from soils and vegetation, driving the characteristic rapid soil moisture depletion we observed in our SPORT-LIS analysis.
 
 Now that we understand both what happened to soil moisture and the atmospheric conditions that caused it, we need to quantify the critical link between them: evapotranspiration. This will help us measure exactly how much water the atmosphere was demanding during these extreme conditions.
+
+::: {.callout-tip style="color: #9f0b64;"}
+#### Knowledge Check
+
+Which combination of meteorological conditions creates the strongest atmospheric demand for water that can lead to flash drought development?
+
+a) Cool temperatures, high humidity, and calm winds
+b) Moderate temperatures, variable humidity, and strong winds
+c) High temperatures, low humidity, and strong winds
+d) High temperatures, high humidity, and calm winds
+
+**Answer: c) High temperatures, low humidity, and strong winds**
+
+*Explanation: This combination maximizes evapotranspiration rates: high temperatures increase the atmosphere's capacity to hold moisture, low humidity creates a steep moisture gradient, and strong winds continuously remove humid air and replace it with dry air.*
+:::
 
 ## Evapotranspiration Analysis
 
@@ -1314,7 +1315,12 @@ Understanding this feedback loop is crucial for grasping why flash droughts can 
 
 This self-reinforcing process helps explain why the 2022 Southern Plains flash drought intensified so quickly and why it was so difficult for natural systems to recover without significant rainfall intervention.
 
-:::: column-margin
+### Calculating Atmospheric Water Demand
+
+For our analysis, we'll calculate reference evapotranspiration using the Hargreaves-Samani method—an approach that's both scientifically robust and computationally practical for our educational purposes. While more complex methods like Penman-Monteith exist, Hargreaves-Samani strikes an excellent balance between accuracy and simplicity, requiring only temperature data that we already have from our URMA analysis.
+
+The beauty of the Hargreaves-Samani approach lies in its use of diurnal temperature range (the difference between daily maximum and minimum temperatures) as a proxy for atmospheric conditions. Large day-night temperature swings typically indicate clear, dry conditions with intense solar heating during the day—exactly the conditions that create high evaporative demand. Small temperature ranges suggest cloudy, humid conditions with lower evaporative demand. This relationship makes the method particularly well-suited for flash drought analysis, where extreme diurnal temperature ranges often coincide with rapid soil moisture depletion.
+
 ::: {.callout-tip style="color: #5a7a2b;"}
 #### Plant Ecology Review
 
@@ -1326,27 +1332,20 @@ Plants manage their energy balance through four key processes: **sensible heat**
 When soil moisture becomes limited, plants face a critical trade-off. Stomata (leaf pores) must open to allow CO₂ uptake for photosynthesis, but this also allows water vapor to escape. As drought stress increases, plants progressively close their stomata to conserve water, reducing transpiration but also limiting photosynthesis and cooling capacity.
 
 **The Drought Stress Cascade:**
-1. **Early stress**: Slight stomatal closure, reduced transpiration
-2. **Moderate stress**: Significant stomatal closure, leaf temperature rises
-3. **Severe stress**: Stomatal closure, leaf wilting, potential tissue damage
-4. **Extreme stress**: Complete stomatal closure, plant survival mode
+* Early stress: Slight stomatal closure, reduced transpiration
+* Moderate stress: Significant stomatal closure, leaf temperature rises
+* Severe stress: Stomatal closure, leaf wilting, potential tissue damage
+* Extreme stress: Complete stomatal closure, plant survival mode
 
 **Energy Balance Implications:**
 When transpiration decreases due to drought stress, the energy that would normally be used for cooling (latent heat) is instead converted to sensible heat, warming both the plant and surrounding air. This contributes to the feedback loop we observe in flash drought events—as plants lose their ability to cool the landscape, air temperatures rise further, increasing atmospheric demand for the remaining soil moisture.
 
 **Connection to Our Metrics:**
-- **Reference ET**: Represents potential atmospheric demand
-- **Actual ET**: What plants can actually provide given water limitations
-- **Soil Moisture Percentiles**: Determine plant water availability
-- **Temperature**: Both driver and consequence of the energy balance shift
+* Reference ET: Represents potential atmospheric demand
+* Actual ET: What plants can actually provide given water limitations
+* Soil Moisture Percentiles: Determine plant water availability
+* Temperature: Both driver and consequence of the energy balance shift
 :::
-::::
-
-### Calculating Atmospheric Water Demand
-
-For our analysis, we'll calculate reference evapotranspiration using the Hargreaves-Samani method—an approach that's both scientifically robust and computationally practical for our educational purposes. While more complex methods like Penman-Monteith exist, Hargreaves-Samani strikes an excellent balance between accuracy and simplicity, requiring only temperature data that we already have from our URMA analysis.
-
-The beauty of the Hargreaves-Samani approach lies in its use of diurnal temperature range (the difference between daily maximum and minimum temperatures) as a proxy for atmospheric conditions. Large day-night temperature swings typically indicate clear, dry conditions with intense solar heating during the day—exactly the conditions that create high evaporative demand. Small temperature ranges suggest cloudy, humid conditions with lower evaporative demand. This relationship makes the method particularly well-suited for flash drought analysis, where extreme diurnal temperature ranges often coincide with rapid soil moisture depletion.
 
 ### Setting Up the Calculations
 
@@ -1393,10 +1392,14 @@ calculate_ra_hargreaves <- function(latitude_deg, day_of_year) {
 study_center_lat <- mean(c(sf::st_bbox(states_sf)[2], sf::st_bbox(states_sf)[4]))
 test_ra <- calculate_ra_hargreaves(study_center_lat, 200)  # July 19th = day 200
 
-cat("Extraterrestrial radiation function test:")
-cat("\nStudy center latitude:", round(study_center_lat, 2), "degrees")
-cat("\nRa for day 200 (July 19):", round(test_ra, 2), "mm/day")
+cat("Extraterrestrial radiation function test:\n",
+    "Study center latitude:", round(study_center_lat, 2), "degrees\n",
+    "Ra for day 200 (July 19):", round(test_ra, 2), "mm/day\n")
 ```
+
+### Creating Daily ET Rasters
+
+Now we'll apply the Hargreaves-Samani calculation to create daily ET rasters for our complete time series. The method's key innovation lies in using diurnal temperature range (√(Tmax - Tmin)) as a proxy for atmospheric conditions. Large temperature differences typically indicate clear, dry conditions with high solar radiation and low humidity - factors that increase atmospheric demand for water vapor. This makes it particularly effective for analyzing the 2022 flash drought, where extreme day-night temperature swings were a hallmark of the intensification periods.
 
 :::: column-margin
 ::: {.callout-tip style="color: #5a7a2b;"}
@@ -1405,10 +1408,6 @@ cat("\nRa for day 200 (July 19):", round(test_ra, 2), "mm/day")
 The solar declination varies seasonally as Earth orbits the sun, ranging from approximately +23.45° at the summer solstice to -23.45° at the winter solstice. The sunset hour angle determines day length, which varies with both latitude and season. The inverse relative distance factor accounts for Earth's elliptical orbit, with Earth closest to the sun (perihelion) around January 3rd and farthest (aphelion) around July 4th.
 :::
 ::::
-
-### Creating Daily ET Rasters
-
-Now we'll apply the Hargreaves-Samani calculation to create daily ET rasters for our complete time series. The method's key innovation lies in using diurnal temperature range (√(Tmax - Tmin)) as a proxy for atmospheric conditions. Large temperature differences typically indicate clear, dry conditions with high solar radiation and low humidity - factors that increase atmospheric demand for water vapor. This makes it particularly effective for analyzing the 2022 flash drought, where extreme day-night temperature swings were a hallmark of the intensification periods.
 
 Now let's implement the Hargreaves-Samani calculations for our complete time series:
 
@@ -1433,10 +1432,10 @@ urma_dates_available <- names(urma_daily_data)
 urma_date_objects <- as.Date(urma_dates_available, format = "%Y%m%d")
 day_of_year_values <- lubridate::yday(urma_date_objects)
 
-cat("Hargreaves-Samani ET calculation setup:")
-cat("\nDates to process:", length(urma_dates_available))
-cat("\nDate range:", as.character(range(urma_date_objects)))
-cat("\nDay of year range:", range(day_of_year_values))
+cat("Hargreaves-Samani ET calculation setup:\n",
+    "Dates to process:", length(urma_dates_available), "\n",
+    "Date range:", as.character(range(urma_date_objects)), "\n",
+    "Day of year range:", range(day_of_year_values), "\n")
 ```
 
 :::: column-margin
@@ -1451,7 +1450,6 @@ With our function defined, we can now calculate ET for each day in our analysis 
 
 ```{r}
 # Calculate Hargreaves-Samani ET for all dates
-cat("Calculating Hargreaves-Samani ET rasters...")
 hargreaves_et_list <- list()
 
 for(i in 1:length(urma_dates_available)) {
@@ -1475,10 +1473,9 @@ for(i in 1:length(urma_dates_available)) {
   hargreaves_et_list[[date_string]] <- et_raster
   
   # Progress indicator
-  if(i %% 10 == 0) cat(" ", i)
+  if(i %% 10 == 0) paste(" ", i)
 }
 
-cat("\nET calculation complete!")
 ```
 
 Now let's organize our results and examine the patterns:
@@ -1488,9 +1485,9 @@ Now let's organize our results and examine the patterns:
 et_hargreaves_series <- terra::rast(hargreaves_et_list)
 
 # Verify the time series structure
-cat("Hargreaves-Samani ET time series:")
-cat("\nDimensions:", paste(dim(et_hargreaves_series), collapse = " x "))
-cat("\nTemporal extent:", length(urma_dates_available), "days")
+cat("Hargreaves-Samani ET time series:\n",
+    "Dimensions:", paste(dim(et_hargreaves_series), collapse = " x "), "\n",
+    "Temporal extent:", length(urma_dates_available), "days\n")
 
 # Calculate summary statistics using terra::global()
 et_min_raw <- terra::global(et_hargreaves_series, "min", na.rm = TRUE)
@@ -1502,10 +1499,10 @@ et_min_overall <- min(et_min_raw$min)
 et_max_overall <- max(et_max_raw$max)
 et_mean_overall <- mean(et_mean_raw$mean)
 
-cat("\n\nET summary statistics:")
-cat("\nOverall minimum ET:", round(et_min_overall, 2), "mm/day")
-cat("\nOverall maximum ET:", round(et_max_overall, 2), "mm/day")
-cat("\nOverall mean ET:", round(et_mean_overall, 2), "mm/day")
+cat("\n\nET summary statistics:\n",
+    "Overall minimum ET:", round(et_min_overall, 2), "mm/day\n",
+    "Overall maximum ET:", round(et_max_overall, 2), "mm/day\n",
+    "Overall mean ET:", round(et_mean_overall, 2), "mm/day\n")
 ```
 
 These ET values represent the atmospheric demand for water during our analysis period. The range from minimum to maximum shows how dramatically this demand varied as the flash drought developed and intensified. The overall mean of 4.07 mm/day indicates substantial atmospheric water demand, while the maximum values reaching 8.73 mm/day during peak conditions represent extremely high evaporative demand—the kind of atmospheric "thirst" that can rapidly deplete soil moisture reserves when precipitation is absent.
@@ -1516,7 +1513,7 @@ To put this in perspective, ET values above 6-7 mm/day under drought conditions 
 
 Let's create a visualization showing how ET demand changed during our key drought dates, using the same dates we used for soil moisture analysis.
 
-```{r}
+```{r fig.height=6}
 # Use the expanded key dates that include analysis boundaries
 key_event_dates_expanded <- c(analysis_start, first_intensification, peak_severity, partial_recovery, peak_conus_extent, analysis_end)
 
@@ -1553,7 +1550,7 @@ ggplot2::ggplot() +
     name = "Reference ET\n(mm/day)",
     limits = c(et_min_overall, et_max_overall)
   ) +
-  ggplot2::facet_wrap(~ date_event, ncol = 2) +
+  ggplot2::facet_wrap(~ date_event, ncol = 3) +
   ggplot2::labs(
     title = "Hargreaves-Samani Reference ET Evolution",
     subtitle = "Key dates showing atmospheric water demand",
@@ -1572,6 +1569,21 @@ This ET evolution map tells a powerful story about atmospheric water demand duri
 
 The progression from June through October shows how atmospheric demand intensified during the flash drought development, then gradually decreased as temperatures cooled in fall. During the peak period, much of Texas and Oklahoma experienced ET rates above 6 mm/day - levels that can exhaust soil moisture reserves in just weeks when precipitation is absent. This visualization clearly demonstrates why the combination of high atmospheric demand and precipitation deficits created such devastating conditions for agriculture and natural ecosystems across the Southern Plains.
 
+::: {.callout-tip style="color: #9f0b64;"}
+#### Knowledge Check
+
+During the 2022 flash drought, when reference evapotranspiration (ET) reached 7-8 mm/day across much of Texas and Oklahoma, this indicates:
+
+a) Plants were transpiring at maximum rates
+b) Soil moisture was abundant
+c) The atmosphere was demanding large amounts of water from the landscape
+d) Precipitation was exceeding evaporation
+
+**Answer: c) The atmosphere was demanding large amounts of water from the landscape**
+
+*Explanation: Reference ET represents the atmospheric demand for water under given meteorological conditions. High reference ET values (7-8 mm/day) indicate extreme atmospheric "thirst" that can rapidly deplete soil moisture reserves, especially when precipitation is absent.*
+:::
+
 ## Integrated Visualization
 
 Up to this point, we've examined each component of the 2022 flash drought separately: the dramatic soil moisture depletion captured by SPORT-LIS, the extreme atmospheric conditions revealed by URMA, and the intense water demand calculated through evapotranspiration. While each analysis tells part of the story, the real power comes from seeing how these variables evolved together as a complete system.
@@ -1580,7 +1592,7 @@ Flash drought isn't just about soil moisture dropping or temperatures rising—i
 
 We already have state-level soil moisture data from our SPORT-LIS analysis. Now we need to extract state-level averages for ET and all meteorological variables. First the ET data we developed.
 
-```{r}
+```{r message=FALSE}
 # Extract state-level means for ET
 state_et <- exactextractr::exact_extract(
   et_hargreaves_series, 
@@ -1588,15 +1600,14 @@ state_et <- exactextractr::exact_extract(
   'mean',
   force_df = TRUE,
   full_colnames = TRUE,
-  append_cols = "state_name"
+  append_cols = "state_name",
+  progress = FALSE
 )
-
-cat("ET extraction complete")
 ```
 
 Now the URMA temperature variables.
 
-```{r}
+```{r message=FALSE}
 # Extract state-level means for temperature variables
 state_tmax <- exactextractr::exact_extract(
   urma_tmax_series, 
@@ -1604,7 +1615,8 @@ state_tmax <- exactextractr::exact_extract(
   'mean',
   force_df = TRUE,
   full_colnames = TRUE,
-  append_cols = "state_name"
+  append_cols = "state_name",
+  progress = FALSE
 )
 
 state_tmin <- exactextractr::exact_extract(
@@ -1613,7 +1625,8 @@ state_tmin <- exactextractr::exact_extract(
   'mean',
   force_df = TRUE,
   full_colnames = TRUE,
-  append_cols = "state_name"
+  append_cols = "state_name",
+  progress = FALSE
 )
 
 state_tmean <- exactextractr::exact_extract(
@@ -1622,15 +1635,14 @@ state_tmean <- exactextractr::exact_extract(
   'mean',
   force_df = TRUE,
   full_colnames = TRUE,
-  append_cols = "state_name"
+  append_cols = "state_name",
+  progress = FALSE
 )
-
-cat("Temperature extraction complete")
 ```
 
 And finally humidity and wind. 
 
-```{r}
+```{r message=FALSE}
 # Extract state-level means for humidity and wind
 state_rh <- exactextractr::exact_extract(
   urma_rh_series, 
@@ -1638,7 +1650,8 @@ state_rh <- exactextractr::exact_extract(
   'mean',
   force_df = TRUE,
   full_colnames = TRUE,
-  append_cols = "state_name"
+  append_cols = "state_name",
+  progress = FALSE
 )
 
 state_wind <- exactextractr::exact_extract(
@@ -1647,10 +1660,9 @@ state_wind <- exactextractr::exact_extract(
   'mean',
   force_df = TRUE,
   full_colnames = TRUE,
-  append_cols = "state_name"
+  append_cols = "state_name",
+  progress = FALSE
 )
-
-cat("Humidity and wind extraction complete")
 ```
 
 Now we'll reshape the new meteorological and ET data into long format and combine with our existing soil moisture time series.
@@ -1712,7 +1724,7 @@ head(integrated_timeseries)
 
 Now we'll create a comprehensive strip plot using `facet_grid()` for better vertical label layout.
 
-```{r}
+```{r fig.height=14}
 # Create integrated strip plot with vertical facet labels
 ggplot2::ggplot(integrated_timeseries, 
                 ggplot2::aes(x = date, y = value, color = state)) +
@@ -1764,6 +1776,21 @@ ggplot2::ggplot(integrated_timeseries,
 
 This integrated strip plot reveals the complete story of how the 2022 Southern Plains flash drought developed as a coupled atmospheric-land system. The top panel shows the drought's fundamental impact - soil moisture percentiles collapsing from near-normal conditions in early June to exceptional drought (below 10th percentile) within just 4-6 weeks, with Texas and Oklahoma experiencing the most severe and sustained impacts. The atmospheric drivers tell the story of why this happened so rapidly: reference evapotranspiration reached extreme levels of 6-8 mm/day during July, driven by maximum temperatures regularly exceeding 40°C (104°F), relative humidity dropping below 25%, and elevated wind speeds that created perfect conditions for rapid moisture extraction from soils and vegetation. What makes this visualization so powerful is the temporal alignment - all the meteorological extremes peaked simultaneously in mid-July, driving maximum atmospheric water demand at exactly the same time soil moisture was plummeting most rapidly. This demonstrates the coupled nature of flash drought development where, unlike conventional droughts that develop gradually over months, all the key drivers aligned simultaneously to create a perfect storm for rapid drying that gave agricultural communities little time to adapt or implement mitigation strategies.
 
+::: {.callout-tip style="color: #9f0b64;"}
+#### Knowledge Check
+
+Looking at the integrated time series for the 2022 event, what pattern demonstrates the coupled nature of flash drought development?
+
+a) Soil moisture and temperature changed independently
+b) High reference ET, extreme temperatures, and low soil moisture percentiles all peaked simultaneously in mid-July
+c) Each state showed completely different patterns
+d) Atmospheric conditions improved while soil moisture continued to decline
+
+**Answer: b) High reference ET, extreme temperatures, and low soil moisture percentiles all peaked simultaneously in mid-July**
+
+*Explanation: The synchronized peaks of all drought indicators in mid-July demonstrate flash drought's coupled nature - atmospheric extremes (high temps, low humidity) drove maximum water demand (high ET) precisely when soil moisture was most depleted, creating a self-reinforcing cycle of rapid drying.*
+:::
+
 ## Agricultural Outcomes Analysis
 
 ### From Physical Indicators to Real-World Impacts
@@ -1774,7 +1801,7 @@ The critical question becomes: how did these extreme physical conditions transla
 
 ### USDA Crop Progress and Condition Reports: Translating Physical Stress into Agricultural Impact
 
-The United States Department of Agriculture (USDA) National Agricultural Statistics Service (NASS) provides the essential bridge between our meteorological analysis and real-world agricultural impacts through their weekly Crop Progress and Condition reports. These reports, published consistently since the 1980s, represent one of the most comprehensive and standardized assessments of agricultural drought stress available anywhere in the world. What makes this dataset particularly valuable for our flash drought analysis is that it captures how rapidly changing physical conditions translate into observable stress in agricultural systems across all major farming states.
+The United States Department of Agriculture (USDA) National Agricultural Statistics Service (NASS) provides the essential bridge between our meteorological analysis and real-world agricultural impacts through their weekly Crop Progress and Condition reports [@U.S.DepartmentOfAgricultureNationalAgriculturalStatisticsService2025]. These reports, published consistently since the 1980s, represent one of the most comprehensive and standardized assessments of agricultural drought stress available anywhere in the world. What makes this dataset particularly valuable for our flash drought analysis is that it captures how rapidly changing physical conditions translate into observable stress in agricultural systems across all major farming states.
 
 For flash drought analysis, **pasture and rangeland conditions** serve as an ideal agricultural indicator because they respond directly to the soil moisture and evapotranspiration patterns we've been tracking. Unlike our SPORT-LIS and URMA datasets that measure physical conditions, pasture condition surveys measure biological responses - how plants and agricultural systems actually react to the atmospheric and soil moisture stress we've documented. This makes them perfect for validating whether our sophisticated Earth observation systems are detecting drought impacts that matter to agricultural communities.
 
@@ -1802,33 +1829,39 @@ USDA state agricultural statisticians collaborate with university extension serv
 
 Each week, statisticians report the percentage of each state's pasturelands falling into each category, creating a quantitative time series that directly measures agricultural drought stress. This approach transforms subjective field observations into standardized data that can be compared across states, years, and drought events - providing exactly the kind of agricultural outcome data needed to validate our meteorological drought analysis.
 
-:::: column-margin
 ::: {.callout-tip style="color: #5a7a2b;"}
 ### Data Review
 
 **USDA NASS QuickStats Technical Specifications:**
-- **Temporal Resolution**: Weekly surveys during growing season (April-October)
-- **Spatial Coverage**: All 50 states plus Puerto Rico
-- **Data Source**: USDA National Agricultural Statistics Service (NASS)
-- **Historical Archive**: Available from 1980-present (40+ years)
-- **File Format**: JSON, XML, CSV via RESTful API
-- **Update Frequency**: Published every Monday (covering previous week)
-- **Sample Size**: Varies by state, typically 200-500 respondents per state
+<ul>
+<li><strong>Temporal Resolution:</strong> Weekly surveys during growing season (April-October)</li>
+<li><strong>Spatial Coverage:</strong> All 50 states plus Puerto Rico</li>
+<li><strong>Data Source:</strong> USDA National Agricultural Statistics Service (NASS)</li>
+<li><strong>Historical Archive:</strong> Available from 1980-present (40+ years)</li>
+<li><strong>File Format:</strong> JSON, XML, CSV via RESTful API</li>
+<li><strong>Update Frequency:</strong> Published every Monday (covering previous week)</li>
+<li><strong>Sample Size:</strong> Varies by state, typically 200-500 respondents per state</li>
+</ul>
 
 **Key Variables for Flash Drought Analysis:**
-- Pasture and rangeland conditions (5-category scale)
-- Major crop conditions for corn, soybeans, wheat, cotton
-- Agricultural land use and irrigation statistics
+<ul>
+<li>Pasture and rangeland conditions (5-category scale)</li>
+<li>Major crop conditions for corn, soybeans, wheat, cotton</li>
+<li>Agricultural land use and irrigation statistics</li>
+</ul>
 
 **Survey Design:**
-- **Stratified Sampling**: Counties stratified by agricultural importance
-- **Multiple Data Sources**: Producer surveys, extension agents, agricultural advisors
-- **Weighted Estimates**: Results weighted by agricultural land area and production
-- **Seasonal Coverage**: Intensive monitoring during critical growing periods
+<ul>
+<li><strong>Stratified Sampling:</strong> Counties stratified by agricultural importance</li>
+<li><strong>Multiple Data Sources:</strong> Producer surveys, extension agents, agricultural advisors</li>
+<li><strong>Weighted Estimates:</strong> Results weighted by agricultural land area and production</li>
+<li><strong>Seasonal Coverage:</strong> Intensive monitoring during critical growing periods</li>
+</ul>
 
-**API Access**: Base URL https://quickstats.nass.usda.gov/api, requires free API key, flexible output formats (JSON, XML, CSV)
+**API Access:** Base URL https://quickstats.nass.usda.gov/api, requires free API key, flexible output formats (JSON, XML, CSV)
+
+**Citation:** U.S. Department of Agriculture, National Agricultural Statistics Service. USDA Crop Progress Reports. (2025).
 :::
-::::
 
 ### Data Access and API Authentication
 
@@ -1870,7 +1903,7 @@ Pass it to the authorization function.
 # Configure rnassqs package authentication
 rnassqs::nassqs_auth(key = nass_api_key)
 
-cat("rnassqs package authentication configured")
+paste("rnassqs package authentication configured")
 ```
 
 ## Agricultural Data Retrieval and Pre-processing
@@ -1885,10 +1918,10 @@ agricultural_states <- c("KANSAS", "MISSOURI", "OKLAHOMA", "ARKANSAS", "TEXAS", 
 analysis_year <- 2022
 
 # Display our analysis scope
-cat("Agricultural impact analysis parameters:")
-cat("\nTarget states:", paste(agricultural_states, collapse = ", "))
-cat("\nAnalysis year:", analysis_year)
-cat("\nFocus: Pasture and rangeland conditions")
+cat("Agricultural impact analysis parameters:\n",
+    "Target states:", paste(agricultural_states, collapse = ", "), "\n",
+    "Analysis year:", analysis_year, "\n",
+    "Focus: Pasture and rangeland conditions\n")
 ```
 
 ### USDA NASS Data Parameters
@@ -1904,16 +1937,6 @@ pasture_params <- list(
   state_name = agricultural_states,    # States: KS, MO, OK, AR, TX, LA
   year = analysis_year                 # Temporal scope: 2022
 )
-
-# Display the query structure
-cat("USDA NASS query parameters:")
-for(param_name in names(pasture_params)) {
-  param_value <- pasture_params[[param_name]]
-  if(length(param_value) > 1) {
-    param_value <- paste(param_value, collapse = ", ")
-  }
-  cat("\n", param_name, ":", param_value)
-}
 ```
 
 ### Data Availability Check
@@ -1924,8 +1947,8 @@ Before downloading the full dataset, we'll check how many records are available.
 # Check data availability using nassqs_record_count()
 record_count <- rnassqs::nassqs_record_count(pasture_params)
 
-cat("Data availability check:")
-cat("\nRecords available:", record_count$count)
+cat("Data availability check:\n",
+    "Records available:", record_count$count, "\n")
 ```
 
 That seems reasonable. Let's proceed.
@@ -1935,14 +1958,9 @@ That seems reasonable. Let's proceed.
 Now we'll download the complete pasture condition dataset for our six focus states during 2022.
 
 ```{r}
+#| output: false
 # Download the complete pasture condition dataset
-cat("Downloading USDA pasture condition data...")
-
 pasture_raw_data <- rnassqs::nassqs(pasture_params)
-
-cat("\n✅ Download completed successfully!")
-cat("\nTotal records retrieved:", nrow(pasture_raw_data))
-cat("\nStates in dataset:", paste(unique(pasture_raw_data$state_name), collapse = ", "))
 ```
 
 ### Examining Data Structure
@@ -1951,18 +1969,17 @@ Let's explore the structure of the USDA data to understand what condition catego
 
 ```{r}
 # Examine the raw data structure
-cat("Raw data structure:")
-cat("\nColumns:", ncol(pasture_raw_data))
-cat("\nRows:", nrow(pasture_raw_data))
+cat("Raw data structure:\n",
+    "Columns:", ncol(pasture_raw_data), "\n",
+    "Rows:", nrow(pasture_raw_data), "\n")
 
 # Display key column names
 key_columns <- c("state_name", "commodity_desc", "short_desc", 
                 "reference_period_desc", "Value", "week_ending")
 available_columns <- key_columns[key_columns %in% names(pasture_raw_data)]
-
-cat("\nKey columns available:")
+cat("Key columns available:\n")
 for(col in available_columns) {
-  cat("\n -", col)
+  cat(" -", col, "\n")
 }
 ```
 
@@ -1971,10 +1988,7 @@ The USDA data structure includes dozens of columns, but we only need a few key o
 ```{r}
 # Examine available condition categories
 condition_types <- unique(pasture_raw_data$short_desc)
-cat("Pasture condition categories:")
-for(i in 1:length(condition_types)) {
-  cat("\n", i, ":", condition_types[i])
-}
+condition_types
 ```
 
 The `short_desc` field reveals that USDA tracks five distinct condition categories, each reported as a percentage of total pasturelands in that state. These categories represent a continuum from excellent (optimal conditions) to very poor (severe stress). Notice that each category is measured independently - they should sum to 100% for each state and week.
@@ -1991,10 +2005,10 @@ For drought analysis, we focus primarily on the "Poor" and "Very Poor" categorie
 ```{r}
 # Examine temporal coverage
 time_periods <- unique(pasture_raw_data$reference_period_desc)
-cat("\nTemporal coverage:")
-cat("\nWeeks available:", length(time_periods))
-cat("\nFirst week:", min(time_periods))
-cat("\nLast week:", max(time_periods))
+cat("\nTemporal coverage:\n",
+    "Weeks available:", length(time_periods), "\n",
+    "First week:", min(time_periods), "\n",
+    "Last week:", max(time_periods), "\n")
 ```
 
 The temporal coverage shows USDA's systematic weekly reporting throughout the 2022 growing season. The week numbering system starts with "WEEK #03" (mid-January) and continues through "WEEK #47" (late November), providing nearly year-round coverage of pasture conditions.
@@ -2013,43 +2027,40 @@ Before processing the data, we need to assess data quality and identify any miss
 
 ```{r}
 # Check data quality and missing values
-cat("Data quality assessment:")
-cat("\nTotal records:", nrow(pasture_raw_data))
+cat("Data quality assessment:\n",
+    "Total records:", nrow(pasture_raw_data), "\n")
 
 # Count valid data values
 valid_data <- !is.na(pasture_raw_data$Value) & 
               pasture_raw_data$Value != "" & 
               pasture_raw_data$Value != "(D)"
-
-cat("\nRecords with valid values:", sum(valid_data))
-cat("\nMissing or suppressed records:", sum(!valid_data))
-cat("\nData completeness:", round(100 * sum(valid_data) / nrow(pasture_raw_data), 1), "%")
+cat("Records with valid values:", sum(valid_data), "\n",
+    "Missing or suppressed records:", sum(!valid_data), "\n",
+    "Data completeness:", round(100 * sum(valid_data) / nrow(pasture_raw_data), 1), "%\n")
 
 # Check for suppressed data "(D)" which indicates confidential information
 suppressed_count <- sum(pasture_raw_data$Value == "(D)", na.rm = TRUE)
 if(suppressed_count > 0) {
-  cat("\nNote:", suppressed_count, "records marked as '(D)' (confidential)")
+  cat("Note:", suppressed_count, "records marked as '(D)' (confidential)\n")
 } else {
-  cat("\n✅ No confidential data suppression detected")
+  cat("✅ No confidential data suppression detected\n")
 }
 ```
 
 Everything looks good here. We can move on.
 
-:::: column-margin
 ::: {.callout-tip style="color: #5a7a2b;"}
-#### Understanding USDA Data Quality
+### Understanding USDA Data Quality
 
 The USDA uses several codes to indicate data quality issues:
-- **Blank/Empty values**: Data not collected or reported for that period
-- **(D)**: Data withheld to avoid disclosing confidential information (rare for state-level aggregates)
-- **(Z)**: Less than half the unit shown (uncommon in percentage data)
+* Blank/Empty values: Data not collected or reported for that period
+* D: Data withheld to avoid disclosing confidential information (rare for state-level aggregates)
+* Z: Less than half the unit shown (uncommon in percentage data)
 
 For pasture condition data at the state level, we typically expect high data completeness because these surveys are conducted systematically across all major agricultural states. Missing data is more common early or late in the season when pasture monitoring may be less intensive.
 
 High data completeness (>95%) indicates reliable, consistent monitoring throughout our analysis period, which is essential for tracking the rapid changes characteristic of flash drought development.
 :::
-::::
 
 ### Data Cleaning and Processing
 
@@ -2134,8 +2145,7 @@ date_check <- pasture_with_dates |>
   dplyr::arrange(week_number) |>
   head(6)
 
-cat("Date alignment verification (first 6 weeks):")
-print(date_check)
+date_check
 ```
 
 **Date Conversion Methodology:**
@@ -2181,21 +2191,21 @@ max_stress_by_state <- drought_stress |>
     .groups = "drop"
   )
 
-cat("Peak agricultural drought stress by state:")
+cat("Peak agricultural drought stress by state:\n")
 print(max_stress_by_state)
 
 # Quick assessment of educational value
 overall_max <- max(max_stress_by_state$max_poor_percent)
-cat("\nOverall maximum stress:", overall_max, "% poor/very poor conditions")
+cat("\nOverall maximum stress:", overall_max, "% poor/very poor conditions\n")
 
 if(overall_max > 60) {
-  cat("\n✅ EXCELLENT drought signal - very strong educational value!")
+  cat("✅ EXCELLENT drought signal - very strong educational value!\n")
 } else if(overall_max > 40) {
-  cat("\n✅ STRONG drought signal - good educational value")
+  cat("✅ STRONG drought signal - good educational value\n")
 } else if(overall_max > 20) {
-  cat("\n⚠️  MODERATE drought signal - adequate for education")
+  cat("⚠️  MODERATE drought signal - adequate for education\n")
 } else {
-  cat("\n❌ WEAK drought signal - limited educational value")
+  cat("❌ WEAK drought signal - limited educational value\n")
 }
 ```
 
@@ -2254,7 +2264,7 @@ This color scheme follows drought monitoring conventions where red colors indica
 
 Now we'll create a multi-panel stacked bar chart with each state in its own subplot, arranged in a 2-column by 3-row layout for easy comparison across the region.
 
-```{r}
+```{r fig.height=11}
 # Create stacked bar chart faceted by state
 agricultural_timeseries_plot <- ggplot2::ggplot(pasture_viz_data, 
                                                 ggplot2::aes(x = week_mid_date, y = percent_condition, 
@@ -2262,7 +2272,7 @@ agricultural_timeseries_plot <- ggplot2::ggplot(pasture_viz_data,
   ggplot2::geom_bar(stat = "identity", position = "stack", width = 6) +
   ggplot2::facet_wrap(~ state, ncol = 2, scales = "free_x") +
   ggplot2::scale_fill_manual(
-    name = "Pasture\nCondition",
+    name = "Condition:",
     values = pasture_condition_colors,
     guide = ggplot2::guide_legend(reverse = TRUE)  # Show Excellent at top, Very Poor at bottom
   ) +
@@ -2280,9 +2290,9 @@ agricultural_timeseries_plot <- ggplot2::ggplot(pasture_viz_data,
     expand = c(0, 0)
   ) +
   ggplot2::labs(
-    title = "2022 Flash Drought Agricultural Impacts - Pasture Condition Evolution",
-    subtitle = "Weekly pasture condition surveys showing rapid deterioration during flash drought development",
-    caption = "Source: USDA NASS Crop Progress and Condition Reports | Colors: Official NIDIS drought monitoring palette"
+    title = "2022 Flash Drought:Pasture Condition Evolution",
+    subtitle = "Weekly pasture condition surveys showing rapid deterioration during flash drought",
+    caption = "Source: USDA NASS Crop Progress and Condition Reports"
   ) +
   ggplot2::theme_minimal() +
   ggplot2::theme(
@@ -2301,7 +2311,7 @@ agricultural_timeseries_plot <- ggplot2::ggplot(pasture_viz_data,
     strip.background = ggplot2::element_rect(fill = "grey90", color = "grey70"),
     
     # Position legend appropriately
-    legend.position = "right",
+    legend.position = "bottom",
     legend.title = ggplot2::element_text(size = 11, face = "bold"),
     legend.text = ggplot2::element_text(size = 10),
     
@@ -2326,6 +2336,7 @@ This illustrates the dramatic agricultural story of the 2022 flash drought, show
 **Texas and Oklahoma** show the classic flash drought pattern - rapid transitions from predominantly good conditions (green) in early June to overwhelming poor/very poor conditions (red/dark red) by late July, with minimal recovery through fall. **Kansas** shows significant stress developing later in the season, while **Arkansas and Missouri** demonstrate more variable patterns with periods of recovery. **Louisiana** maintained relatively stable conditions with less extreme deterioration.
 
 This agricultural visualization directly validates our meteorological analysis - the states showing the most extreme soil moisture depletion and highest atmospheric water demand (Texas, Oklahoma, Kansas) are exactly the states experiencing the most severe and sustained agricultural stress.
+
 ## Integrated Flash Drought Analysis
 
 ### Connecting the Flash Drought Impact Chain
@@ -2351,9 +2362,9 @@ agricultural_drought_stress <- pasture_with_dates |>
   dplyr::rename(date = week_mid_date) |>
   dplyr::select(state, date, poor_very_poor_percent)
 
-cat("Agricultural drought stress data prepared")
-cat("\nDate range:", as.character(range(agricultural_drought_stress$date)))
-cat("\nMax stress level:", round(max(agricultural_drought_stress$poor_very_poor_percent), 1), "%")
+cat("Agricultural drought stress data prepared\n",
+    "Date range:", as.character(range(agricultural_drought_stress$date)), "\n",
+    "Max stress level:", round(max(agricultural_drought_stress$poor_very_poor_percent), 1), "%\n")
 ```
 
 ### Aligning Soil Moisture and ET Data
@@ -2369,7 +2380,7 @@ soil_moisture_weekly <- state_timeseries_long |>
   dplyr::filter(date %in% agricultural_dates) |>
   dplyr::select(state, date, soil_moisture_percentile)
 
-cat("Soil moisture weekly data aligned:", nrow(soil_moisture_weekly), "records")
+paste("Soil moisture weekly data aligned:", nrow(soil_moisture_weekly), "records")
 ```
 Now the ET data.
 
@@ -2382,7 +2393,7 @@ et_weekly <- integrated_timeseries |>
   dplyr::select(state, date, value) |>
   dplyr::rename(et_mm_day = value)
 
-cat("ET weekly data aligned:", nrow(et_weekly), "records")
+paste("ET weekly data aligned:", nrow(et_weekly), "records")
 ```
 
 The state names are slightly different in the varying datasets; we need to make sure they're the same before proceeding to standardization and plotting.
@@ -2460,7 +2471,7 @@ et_standardized <- et_weekly |>
   ) |>
   dplyr::select(state, date, standardized_value, variable_type)
 
-cat("ET standardization range:", round(et_min, 2), "to", round(et_max, 2), "mm/day")
+paste("ET standardization range:", round(et_min, 2), "to", round(et_max, 2), "mm/day")
 ```
 
 Agricultural stress is already on a 0-100 scale.
@@ -2484,9 +2495,6 @@ integrated_data <- dplyr::bind_rows(
   et_standardized, 
   agricultural_standardized
 )
-
-cat("Integrated dataset created:", nrow(integrated_data), "total records")
-cat("\nVariables:", paste(unique(integrated_data$variable_type), collapse = ", "))
 ```
 
 ### Color Palette for Multi-Variable Plot
@@ -2496,7 +2504,7 @@ We'll create a three-color palette that complements our existing NIDIS drought c
 ```{r}
 # Define color palette for the three key variables
 integrated_colors <- c(
-  "Soil Moisture Percentile" = "#4169E1",        # Royal blue (cool, water-related)
+  "Soil Moisture (%)" = "#4169E1",        # Royal blue (cool, water-related)
   "ET Demand (standardized)" = "#FF8C00",        # Dark orange (warm, energy-related) 
   "Agricultural Stress (%)" = "#228B22"          # Forest green (agriculture-related)
 )
@@ -2507,8 +2515,8 @@ integrated_colors <- c(
 
 Now we'll create a multi-panel strip plot with one panel per state (6 rows, 1 column), showing all three variables on standardized scales to reveal the temporal relationships between meteorological drivers, soil moisture response, and agricultural impacts.
 
-```{r}
-# Update the plot to use facet_wrap with ncol=2 for vertical strips like other plots
+```{r fig.height=10}
+# Create the faceted plot
 integrated_timeseries_plot <- ggplot2::ggplot(integrated_data, 
                                               ggplot2::aes(x = date, y = standardized_value, 
                                                           color = variable_type)) +
@@ -2516,7 +2524,7 @@ integrated_timeseries_plot <- ggplot2::ggplot(integrated_data,
   ggplot2::geom_point(size = 1.5, alpha = 0.7) +
   ggplot2::facet_wrap(~ state, ncol = 2, scales = "fixed") +  # Changed to facet_wrap
   ggplot2::scale_color_manual(
-    name = "Flash Drought Components:",
+    name = "Component:",
     values = integrated_colors
   ) +
   ggplot2::scale_x_date(
@@ -2532,8 +2540,8 @@ integrated_timeseries_plot <- ggplot2::ggplot(integrated_data,
     expand = c(0.02, 0)
   ) +
   ggplot2::labs(
-    title = "Integrated Flash Drought Analysis - Drivers, Indicators, and Outcomes",
-    subtitle = "Standardized time series showing relationships between soil moisture, atmospheric demand, and agricultural stress",
+    title = "Integrated Drought Analysis: Drivers, Indicators, and Outcomes",
+    subtitle = "Standardized time series for soil moisture, atmospheric demand, and agricultural stress",
     caption = "Sources: NASA SPORT-LIS (soil moisture), NOAA URMA (meteorology), USDA NASS (agriculture)\nNote: All variables standardized to 0-100 scale for comparison"
   ) +
   ggplot2::theme_minimal() +
