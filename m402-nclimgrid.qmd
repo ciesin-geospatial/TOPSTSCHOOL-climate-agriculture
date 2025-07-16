@@ -12,7 +12,7 @@ code-block-bg: true
 code-block-border-left: "#315c86"
 format: 
     html
-bibliography: m405-references.bib
+bibliography: m402-references.bib
 ---
 
 ## Overview
