@@ -1,0 +1,787 @@
+---
+title: "Weird Weather In Washington State"
+author: 
+    - Masha Vernik
+    - Camilla Green
+    - Juan Martinez
+    - NLU MS Computer Science Students 
+format: 
+    html
+bibliography: m503-weird-weather.bib
+
+---
+
+# Weird Weather: Precipitation and Temperature Variability for Assessing Agricultural Vulnerability to Climate Change
+
+### Overview
+As climate change is causing more frequent and extreme weather events like droughts, floods, and wildfires across the globe, another impact tends to fly under the radar: weather variability. There is building evidence that **climate change is causing increasingly unpredictable precipitation and temperature patterns around the world** [@pendergrass2017precipitation; @vargaszeppetello2020temperature]. 
+
+This means that long-held beliefs around how much it will rain and when are becoming outdated and future rainfall patterns are more uncertain. It means that previous assumptions around when it will be warm and when it will be cold are disrupted. While a city-dweller might not mind if the spring rains come earlier or later or not at all, disruption in precipitation patterns has a big impact on people who earn their livelihoods from the land. 
+
+**I learned this in my interviews with farmers in western Washington for my M.S. thesis [@vernik2025resilience].** My research investigated the role of crop diversity in climate resilience among organic farms in western Washington. I drove across the area west of the Cascade mountains, known for lush green forests and rainy weather, asking farmers about how they experience and adapt to climate change. Nearly all of the twenty-eight farmers I interviewed mentioned unpredictable weather as a climate impact they’re feeling on their farms. One farmer shared: 
+
+> “It's unpredictable. You know, I don't know. We can kind of count on having fairly consistent rain most of the way through June a lot of the times. But we've seen a couple of years where it's been dry, and then there's been years where I've been out here putting pumps on the river in like March and April, which is crazy.”
+
+![ One of the vegetable farms Masha visited for her M.S. research on crop diversity and climate resilience. Many interviewed farmers reported dealing with unpredictable rain and temperature patterns. Photo credit: Masha Vernik](data/m303-files/vernik-1.jpg)
+One of the vegetable farms Masha visited for her M.S. research on crop diversity and climate resilience. Many interviewed farmers reported dealing with unpredictable rain and temperature patterns. [^1]
+
+[^1]: Photo credit: Masha Vernik
+ 
+
+Unusual temperature and precipitation patterns are not isolated to western Washington. Other research also reports farmers experiencing variable weather patterns across the globe, from Ghana to India to the Southeastern United States and beyond [@shortridge2019rainfall; @thimmegowda2025rainfall; @thornton2014climate; @yeleliere2023farmers]. 
+
+**Being unable to predict weather patterns poses problems for farmers**, especially those using rainfed agriculture who do not rely on irrigation for watering their crops. For example, a farmer may plant crops expecting rain in spring to water them, but if the rain doesn’t come when expected, those crops can fail. While a certain amount of variability is inherent to climate in general, climate change seems to be making naturally stochastic weather patterns even less predictable [@pendergrass2017precipitation].
+
+
+**Being able to identify areas with increasingly variable weather can guide future research in climate vulnerability and adaptation.** It’s important to note that a system’s vulnerability is not only based on how much weather stress it is exposed to, but also how sensitive it is to that exposure and its capacity to adapt to changing conditions [@adger2006vulnerability]. Nevertheless, weather stress is an important component to measure, and weather variability can contribute significantly to that stress.
+
+
+**This module will teach you how to calculate temperature and precipitation variability.**
+
+This module uses anomalies as a stepping stone to variability, where an anomaly is the difference between the temperature/precipitation for a county on a given day and the average for that day over the preceding 15 years. Higher anomalies indicate more unpredictable weather and can indicate the counties in which farmers may be exposed to increased variability. In other words, this code will tell us how strange the weather was in spring 2024, but it won’t tell us how variable the weather is year over year – multiple years would have to be combined to calculate this. 
+
+This module calculates anomalies for each day between May 1st and July 1st, 2024 for all counties in Washington state, but the code can be applied to any location for any time period where there is climatological data. Though outside the scope of this module, variability data could be integrated with socio-economic data to get a broader picture of vulnerability. 
+
+::: callout-note
+
+**When we use the following terms in this module, we refer to these definitions:**
+
+- **Normals**: A county’s average temperature/precipitation for each day in May and June over 15 years (2009-2023)
+- **Anomalies**: Difference between the temperature/precipitation for a county for a given time period and the average for that time period over the preceding 15 years. In other words, how unpredictable the weather is for a single year.
+- **Variability**: Combined anomalies from many years. Or, how unpredictable the weather is over many years.
+- **Vulnerability**: “State of susceptibility to harm from exposure to stresses associated with environmental and social change and from the absence of capacity to adapt” [@adger2006vulnerability] 
+
+
+:::
+
+
+
+### Objectives
+
+In this lesson, we will demonstrate how to:
+
+- Access Google Earth Engine (GEE) and initialize the Python API
+- Import county data using U.S. Census TIGER/County data and visualize boundaries in Washington State
+- Retrieve temperature and precipitation data using the ERA5-Land Daily Aggregated database the GEE Data Catalog
+- Compute climatological normals (2009–2023) for each day in May and June for each county in Washington state
+- Calculate anomalies by subtracting 2024 temperature and precipitation data from normals data for each day in May and June for each county in Washington state
+- Visualize temperature and precipitation anomalies across Washington counties using interactive maps
+
+
+## Introduction
+
+
+
+### Getting Started with Google Earth Engine (GEE)
+
+Google Earth Engine (GEE) is an online, cloud-based platform that allows you to access and analyze satellite imagery and global geospatial datasets. 
+
+GEE requires registration. Since this is for educational purposes, a pricing plan is not required for noncommercial registration. For more information accessing GEE, please visit [Earth Engine Access](https://developers.google.com/earth-engine/guides/access). 
+
+Once you have registered and enabled the GEE API, we can now work with GEE in Python! 
+
+For more information, please see [An Intro to the Earth Engine Python API](https://developers.google.com/earth-engine/tutorials/community/intro-to-python-api) 
+
+
+First of all, run the following cell to initialize the API. The output will contain instructions on how to grant this notebook access to Earth Engine using your account. To find out the **project ID**, Go to [https://console.cloud.google.com/](https://console.cloud.google.com/); In the top bar, click the dropdown next to the current project name. You’ll see a list of projects. The Project ID is in the second column.
+
+```{python} 
+#| eval: false 
+
+import ee
+
+# Trigger the authentication flow.
+ee.Authenticate()
+
+# Initialize the library.
+ee.Initialize(project='PROJECT_ID') #replpace with your project ID
+
+```
+
+```{python} 
+#| echo: false
+
+import ee
+ee.Authenticate()
+ee.Initialize(project='ee-jmartine')
+print(ee.String('Hello from the Earth Engine servers!').getInfo())
+```
+
+The code above should generate a GEE token, which this application will request for you to paste. 
+
+
+### Working with U.S. Census TIGER data
+
+
+::: {.callout-tip style="color: #5a7a2b;"}
+## Python packages
+
+This lesson uses the following Python packages to work with Google Earth Engine:
+
+- `ee and earthengine-api` – provide the Python interface to Google Earth Engine, enabling authentication, dataset access (e.g., TIGER counties, ERA5-Land), and cloud-based geospatial processing.
+- `pandas` – manages tabular data, making it easy to join county-level statistics, calculate anomalies, and export results.
+- `numpy` – supports efficient array-based numerical computations, useful for handling large climate datasets.
+- `folium` – creates interactive web maps for visualizing county boundaries and anomaly layers directly in the notebook.
+- `matplotlib` – generates static plots, such as time series of temperature and precipitation anomalies.
+- `datetime` – provides tools to work with calendar dates (e.g., mapping day-of-year values to actual dates).
+- `branca.colormap` – adds customized color scales to Folium maps, helping to represent anomaly values clearly.
+
+
+:::
+
+
+## Acquiring GEE Data
+
+Together, these packages let us bridge GEE’s cloud-based geospatial data with Python’s data analysis tools, making it possible to calculate, store, and visualize climate and census information at the county level.
+
+```{python}
+
+# import packages
+import folium
+import matplotlib.pyplot as plt
+import pandas as pd
+import datetime
+import branca.colormap as cm
+
+import matplotlib.dates as mdates
+
+from datetime import datetime, timedelta
+
+
+
+```
+ 
+
+ 
+
+Once the Python packages are imported, we can start working with data on GEE. The following code will request U.S. Census Tiger boundaries as geospatial polygon features. In this case we are requesting the state of Washington (code 53).
+
+```{python}
+
+# U.S. Census counties (2020)
+counties = ee.FeatureCollection("TIGER/2018/Counties")
+
+# Filter to Washington State (STATEFP = '53')ß
+wa_counties = counties.filter(ee.Filter.eq("STATEFP", "53"))
+
+```
+
+After loading the boundary features, we can map WA county boundaries on GEE for a quick look:
+
+```{python}
+
+# # Create the map
+# Map1 = geemap.Map(center=[47.5, -120], zoom=6)
+
+# # Add Washington counties layer
+# Map1.addLayer(wa_counties, {}, "Washington Counties")
+
+# # Display the map
+# Map1
+
+
+# Convert the Earth Engine FeatureCollection to GeoJSON
+wa_counties_geojson = ee.FeatureCollection(wa_counties).getInfo()
+
+# Create a folium map
+Map1 = folium.Map(location=[47.5, -120], zoom_start=6)
+
+# Add the counties as a GeoJSON overlay
+folium.GeoJson(
+    wa_counties_geojson,
+    name="Washington Counties"
+).add_to(Map1)
+
+# Add layer control
+folium.LayerControl().add_to(Map1)
+
+# Display the map
+Map1
+
+```
+
+Figure 1: This is a time series of the mean daily temperature anomaly across all counties in Washington. It shows that most days were colder than the ‘normal’ temperature for that day across the entire state.
+
+### Importing ERA5 Land Daily Aggregated image collection
+
+The [GEE Data Catalog](https://developers.google.com/earth-engine/datasets) is a great source for planetary-scale Earth science data.
+
+From this catalog, we will be working with the [ERA5-Land Daily Aggregated - ECMWF Climate Reanalysis](https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_LAND_DAILY_AGGR?hl=en). 
+
+Google Earth Engine stores the ERA-5 Land dataset as an “image collection”, which is a series of ‘images’ or gridded raster datasets, each representing climate variables in a given location at a particular time. 
+
+From the GEE Data catalog, we can import the ERA5-Land Daily Aggregated dataset from Google Earth Engine and prepare it by filtering for the years of interest, selecting key climate variables, and clipping the data to Washington State:
+
+
+
+```{python}
+
+#Import data
+era5 = ee.ImageCollection("ECMWF/ERA5_LAND/DAILY_AGGR")
+
+# Filter to years and selected bands
+era5 = era5.filterDate('2009-01-01', '2024-12-31').select('temperature_2m', 'total_precipitation_sum')
+
+# Clip each image to Washington state (functionally map over the collection)
+era5 = era5.map(lambda img: img.clip(wa_counties))
+
+```
+
+Filter Data from ERA5 depending on the days and years of interest and data availability. For this module, we are using 2024 as the focal year, and calculating normals from the preceding 15 years (2009 - 2023).
+
+```{python}
+# Filter to list of years 
+
+# Creating list of normals years for ERA 5 land
+era5_hist = era5.filterDate('2009-01-01', '2023-12-31')
+
+
+# Creating list of days for the year
+era5_2024 = era5.filterDate('2024-01-01', '2024-12-31')
+
+```
+
+### Calculate Normals from 2009 - 2023
+
+We can define a function to calculate county-level averages for precipitation and temperature from GEE images. This function reduces each image over the county boundaries, assigns a county identifier, and ensures that calculations work even if the image projection scale is missing.
+
+
+```{python}
+# Function to get average values for each county in a FeatureCollection
+# Safer Avg function with fallback scale
+# Safe average function with fixed scale and GEOID to county_id
+def Avg(image, counties, fallback_scale=10000):
+    # Safely get scale (if projection is valid)
+    scale = ee.Number(fallback_scale)
+    try:
+        proj_scale = image.projection().nominalScale()
+        scale = ee.Algorithms.If(proj_scale, proj_scale, scale)
+    except:
+        pass  # fallback already defined
+
+    # Reduce image over counties
+    stats = image.reduceRegions(
+        collection=counties,
+        reducer=ee.Reducer.mean(),
+        scale=scale
+    )
+
+    # Ensure 'county_id' property is present (based on GEOID)
+    def add_ids(f):
+        return f.set('county_id', f.get('GEOID'))
+
+    return stats.map(add_ids)
+
+
+
+```
+
+
+Next, we extract county identifiers and names from the TIGER counties dataset and use them to initialize empty DataFrames that will store temperature and precipitation values.
+
+```{python}
+
+# Get both county GEOIDs and names
+county_ids = wa_counties.aggregate_array('GEOID').getInfo()
+county_names = wa_counties.aggregate_array('NAME').getInfo()
+
+# Initialize DataFrames
+temps_1 = pd.DataFrame({'county_id': county_ids, 'county_name': county_names})
+precips_1 = pd.DataFrame({'county_id': county_ids, 'county_name': county_names})
+
+```
+
+After setting up the DataFrames, loop through selected days of the year to calculate county-level climatological averages of temperature and precipitation (2009–2023), storing the results in DataFrames for later comparison with observed 2024 values. In this example, we calculate normals for each day in May and June (May 1 to July 1, days 121 to 182), but you can calculate a fewer number of days for educational purposes to reduce processing time (e.g. May 1 to May 3, days 121 to 124).
+
+
+```{python}
+
+
+# Loop through days of year (DOY 121–123, i.e., May 1–3 for testing)
+for day in range(121, 182): 
+    day_str = str(day)
+
+    # 1. Get composite average for this DOY across all years
+    day_data = era5_hist.filter(ee.Filter.calendarRange(day, day, 'day_of_year'))
+    composite = day_data.mean()
+
+    # 2. Reduce over counties
+    reduced = composite.reduceRegions(
+        collection=wa_counties,
+        reducer=ee.Reducer.mean(),
+        scale=10000  # ERA5 resolution
+    )
+
+    # Add county_id and county_name to each feature
+    def add_county_info(f):
+        return f.set({
+            'county_id': f.get('GEOID'),
+            'county_name': f.get('NAME')
+        })
+
+    reduced = reduced.map(add_county_info)
+
+    # 3. TEMPERATURE EXTRACTION
+    temp_data = reduced.map(lambda f: ee.Feature(None, {
+        'county_id': f.get('county_id'),
+        'county_name': f.get('county_name'),
+        day_str: f.get('temperature_2m')
+    })).reduceColumns(
+        reducer=ee.Reducer.toList(3),
+        selectors=['county_id', 'county_name', day_str]
+    ).getInfo()['list']
+
+    temp_df = pd.DataFrame(temp_data, columns=['county_id', 'county_name', day_str])
+    temps_1 = pd.merge(temps_1, temp_df, on=['county_id', 'county_name'], how='left')
+
+    # 4. PRECIPITATION EXTRACTION
+    precip_data = reduced.map(lambda f: ee.Feature(None, {
+        'county_id': f.get('county_id'),
+        'county_name': f.get('county_name'),
+        day_str: f.get('total_precipitation_sum')
+    })).reduceColumns(
+        reducer=ee.Reducer.toList(3),
+        selectors=['county_id', 'county_name', day_str]
+    ).getInfo()['list']
+
+    precip_df = pd.DataFrame(precip_data, columns=['county_id', 'county_name', day_str])
+    precips_1 = pd.merge(precips_1, precip_df, on=['county_id', 'county_name'], how='left')
+
+
+
+```
+
+```{python}
+
+county_ids = wa_counties.aggregate_array('GEOID').getInfo()
+county_names = wa_counties.aggregate_array('NAME').getInfo()
+
+# Create base DataFrames with both ID and name
+temps_daily1 = pd.DataFrame({'county_id': county_ids, 'county_name': county_names})
+precips_daily1 = pd.DataFrame({'county_id': county_ids, 'county_name': county_names})
+```
+
+Loop over each day in 2024 to extract daily temperature and precipitation values for every county in Washington. These values are stored in DataFrames (temps_daily1 and precips_daily1) to be compared against the long-term climatological normals. In this example, we calculate daily values for each day in May and June (May 1 to July 1, days 121 to 182), but you can calculate a fewer number of days for educational purposes to reduce processing time (e.g. May 1 to May 3, days 121 to 124)..
+
+```{python}
+
+
+# Loop over each day in 2024 (example: DOY 121–123)
+for doy in range(121, 182):#182
+
+    
+    date = datetime(2024, 1, 1) + timedelta(days=doy - 1)
+
+
+    # Use DOY as string for column name
+    doy_str = str(doy)
+
+    # Get the image for the day
+    img = era5_2024.filterDate(date.strftime('%Y-%m-%d')).first()
+
+    if img is None:
+        print(f"No image found for DOY {doy}")
+        continue
+
+    # Reduce to mean per county
+    reduced = img.reduceRegions(
+        collection=wa_counties,
+        reducer=ee.Reducer.mean(),
+        scale=10000
+    )
+
+    # Add county metadata
+    def add_county_info(f):
+        return f.set({
+            'county_id': f.get('GEOID'),
+            'county_name': f.get('NAME')
+        })
+
+    reduced = reduced.map(add_county_info)
+
+    # ------- TEMPERATURE --------
+    temp_data = reduced.map(lambda f: ee.Feature(None, {
+        'county_id': f.get('county_id'),
+        'county_name': f.get('county_name'),
+        doy_str: f.get('temperature_2m')
+    })).reduceColumns(
+        reducer=ee.Reducer.toList(3),
+        selectors=['county_id', 'county_name', doy_str]
+    ).getInfo()['list']
+
+    temp_df = pd.DataFrame(temp_data, columns=['county_id', 'county_name', doy_str])
+    temps_daily1 = pd.merge(temps_daily1, temp_df, on=['county_id', 'county_name'], how='left')
+
+    # ------- PRECIPITATION --------
+    precip_data = reduced.map(lambda f: ee.Feature(None, {
+        'county_id': f.get('county_id'),
+        'county_name': f.get('county_name'),
+        doy_str: f.get('total_precipitation_sum')
+    })).reduceColumns(
+        reducer=ee.Reducer.toList(3),
+        selectors=['county_id', 'county_name', doy_str]
+    ).getInfo()['list']
+
+    precip_df = pd.DataFrame(precip_data, columns=['county_id', 'county_name', doy_str])
+    precips_daily1 = pd.merge(precips_daily1, precip_df, on=['county_id', 'county_name'], how='left')
+
+
+```
+
+
+## Calculating Anomalies from Precipitation and Temperature Data
+
+We can observe daily temperature anomalies by computing how much the observed daily temperatures differ from the long-term climatological averages for each county. We can extract daily temperature and precipitation data and compare it to the normalized data calculated above.
+
+This chart displays the difference between 2024 temperatures and the average 2009-2023 temperatures for each day in May and June. The column number represents the day of the year (e.g. 121 is May 1, 122 is May 2, etc.).
+
+
+```{python}
+# Ensure both have same index and columns
+obs = temps_daily1.set_index('county_id').copy()
+clim = temps_1.set_index('county_id').copy()
+
+# Extract day columns (e.g., '121'–'365')
+day_cols = [col for col in obs.columns if col.isdigit() and col in clim.columns]
+
+# Subset and align
+obs_days = obs[day_cols].astype(float).sort_index()
+clim_days = clim[day_cols].astype(float).sort_index()
+
+# Subtract climatology from observed: get daily anomalies
+temps_anomalies = obs_days - clim_days
+
+
+
+# Convert DOY column names to datetime (2024 is a leap year)
+new_columns = {
+    col: datetime(2024, 1, 1) + timedelta(days=int(col) - 1)
+    for col in temps_anomalies.columns
+}
+
+temps_anomalies = temps_anomalies.rename(columns=new_columns)
+
+temps_anomalies.head()
+```
+
+
+This chart displays the difference between 2024 precipitation amount and the average 2009-2023 precipitation for each day in May and June. The column number represents the day of the year (e.g. 121 is May 1, 122 is May 2, etc.).
+
+```{python}
+# Ensure both have same index and columns
+obs = precips_daily1.set_index('county_id').copy()
+clim = precips_1.set_index('county_id').copy()
+
+# Extract day columns (e.g., '121'–'365')
+day_cols = [col for col in obs.columns if col.isdigit() and col in clim.columns]
+
+# Subset and align
+obs_days = obs[day_cols].astype(float).sort_index()
+clim_days = clim[day_cols].astype(float).sort_index()
+
+# Subtract climatology from observed: get daily anomalies
+precips_anomalies = obs_days - clim_days
+
+new_columns = {
+    col: datetime(2024, 1, 1) + timedelta(days=int(col) - 1)
+    for col in precips_anomalies.columns
+}
+
+precips_anomalies = precips_anomalies.rename(columns=new_columns)
+ 
+
+precips_anomalies.head()
+``` 
+
+Once we have calculated anomalies for each day, the data can be used to plot  a timeseries graph. 
+
+```{python} 
+
+
+# List of anomaly DataFrames and their labels
+anomalies_df = [
+    ("Temperature", temps_anomalies),
+    ("Precipitation", precips_anomalies)
+]
+
+fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(12, 8), sharex=True)
+
+for ax, (label, anomalies) in zip(axes, anomalies_df):
+
+    # Select datetime columns only
+    date_cols = pd.to_datetime(anomalies.columns, errors="coerce")
+    mask = date_cols.notna()
+
+    # Mean anomaly across counties for each date
+    daily_mean = anomalies.loc[:, mask].mean(axis=0)
+    daily_mean.index = date_cols[mask]
+    daily_mean = daily_mean.sort_index()
+
+    # Plot
+    colors = ["red" if v < 0 else "blue" for v in daily_mean.values]
+    ax.plot(daily_mean.index, daily_mean.values, color="gray", linewidth=1.5)
+    ax.scatter(daily_mean.index, daily_mean.values, c=colors, edgecolor="black", s=40)
+    ax.axhline(0, color="black", linestyle="--", linewidth=1)
+
+    ax.set_title(f"Mean Daily {label} Anomalies Across All Counties (2024)")
+    ax.set_ylabel("Anomaly")
+    ax.grid(True)
+
+# ---- X-axis: show dates ----
+axes[-1].set_xlabel("Date")
+axes[-1].xaxis.set_major_locator(mdates.DayLocator(interval=2))  # every 7 days
+axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
+
+
+fig.autofmt_xdate()  # rotate labels so they don't overlap
+plt.tight_layout()
+plt.show()
+
+
+```
+
+Figure 2: This is a time series of the mean daily precipitation anomaly across all counties in Washington. It shows that most days saw slightly below average precipitation than the ‘normal’ precipitation for that day, but when there was rainfall, it was much higher than average.
+
+
+We can also use the data to calculate an average anomalies per county, and use GEE to plot the data on an interactive map:
+
+```{python}
+precips_anomalies['avg_anomaly'] = precips_anomalies.mean(axis=1)
+temps_anomalies['avg_anomaly'] = temps_anomalies.mean(axis=1)
+
+
+precips_anomaly_result = precips_anomalies[['avg_anomaly']].copy()
+precips_anomaly_result.index.name = 'county_id'
+
+temps_anomaly_result = temps_anomalies[['avg_anomaly']].copy()
+temps_anomaly_result.index.name = 'county_id'
+
+
+temps_anomaly_result.head()
+
+```
+
+
+```{python}
+# Step 1: Create EE dictionaries from each anomaly DataFrame
+temps_anomaly_dict = ee.Dictionary(temps_anomaly_result['avg_anomaly'].to_dict())
+precips_anomaly_dict = ee.Dictionary(precips_anomaly_result['avg_anomaly'].to_dict())
+
+# Step 2: Define a function to set both anomalies to each county feature
+def add_both_anomalies(feature):
+    geoid = feature.get('GEOID')
+    temp_val = temps_anomaly_dict.get(geoid)
+    precip_val = precips_anomaly_dict.get(geoid)
+    return feature.set({
+        'avg_temp_anomaly': temp_val,
+        'avg_precip_anomaly': precip_val
+    })
+
+# Step 3: Apply to the FeatureCollection
+wa_counties_anomaly = wa_counties.map(add_both_anomalies)
+
+
+```
+
+```{python}
+# View the first feature (prints a dictionary of properties including avg_anomaly)
+print(wa_counties_anomaly.first().getInfo())
+
+```
+
+
+
+```{python} 
+
+# Convert FeatureCollection to GeoJSON
+geojson = wa_counties_anomaly.getInfo()
+
+# Extract temperature anomaly values
+temp_vals = [f['properties'].get('avg_temp_anomaly') for f in geojson['features'] if f['properties'].get('avg_temp_anomaly') is not None]
+temp_min, temp_max = min(temp_vals), max(temp_vals)
+
+# Create colormap for temperature
+temp_colormap = cm.LinearColormap(['red', 'white', 'green'], vmin=temp_min, vmax=temp_max)
+temp_colormap.caption = 'Avg Temperature Anomaly (°C)'
+
+# Create folium map for temperature
+Map_temp = folium.Map(location=[47.5, -120], zoom_start=6)
+temp_colormap.add_to(Map_temp)
+
+# Style function for temperature
+def temp_style(feature):
+    val = feature['properties'].get('avg_temp_anomaly')
+    color = 'gray' if val is None else temp_colormap(val)
+    return {
+        'fillOpacity': 0.7,
+        'weight': 1,
+        'color': 'black',
+        'fillColor': color
+    }
+
+# Add layer
+folium.GeoJson(
+    geojson,
+    name='Temperature Anomaly',
+    style_function=temp_style,
+    tooltip=folium.GeoJsonTooltip(fields=['avg_temp_anomaly'], aliases=['Temp Anomaly (°C):'])
+).add_to(Map_temp)
+
+folium.LayerControl().add_to(Map_temp)
+Map_temp
+
+```
+
+Figure 3: This map shows that most of Washington experienced colder than average temperatures in May and June 2024, with the exception of most of the coastal counties in western Washington and the southwestern region of the state. 
+
+
+
+```{python}
+# Extract precipitation anomaly values
+precip_vals = [f['properties'].get('avg_precip_anomaly') for f in geojson['features'] if f['properties'].get('avg_precip_anomaly') is not None]
+precip_min, precip_max = min(precip_vals), max(precip_vals)
+
+# Create colormap for precipitation
+precip_colormap = cm.LinearColormap(['brown', 'white', 'green'], vmin=precip_min, vmax=precip_max)
+precip_colormap.caption = 'Avg Precipitation Anomaly (mm)'
+
+# Create folium map for precipitation
+Map_precip = folium.Map(location=[47.5, -120], zoom_start=6)
+precip_colormap.add_to(Map_precip)
+
+# Style function for precipitation
+def precip_style(feature):
+    val = feature['properties'].get('avg_precip_anomaly')
+    color = 'gray' if val is None else precip_colormap(val)
+    return {
+        'fillOpacity': 0.7,
+        'weight': 1,
+        'color': 'black',
+        'fillColor': color
+    }
+
+# Add layer
+folium.GeoJson(
+    geojson,
+    name='Precipitation Anomaly',
+    style_function=precip_style,
+    tooltip=folium.GeoJsonTooltip(fields=['avg_precip_anomaly'], aliases=['Precip Anomaly (mm):'])
+).add_to(Map_precip)
+
+folium.LayerControl().add_to(Map_precip)
+Map_precip
+
+```
+
+Figure 4: This map shows that western Washington generally experienced a wetter than average spring in 2024, and eastern Washington had a drier than average spring that year.
+
+
+
+
+```{python}
+
+# Convert EE FeatureCollection to GeoJSON
+geojson = wa_counties_anomaly.getInfo()  # Only safe for small datasets
+
+# Create base folium map
+Map = folium.Map(location=[47.5, -120], zoom_start=6)
+
+# -------------------- TEMPERATURE ANOMALY LAYER --------------------
+
+# Extract temperature anomaly values
+temp_vals = [f['properties'].get('avg_temp_anomaly') for f in geojson['features'] if f['properties'].get('avg_temp_anomaly') is not None]
+temp_min, temp_max = min(temp_vals), max(temp_vals)
+
+# Create colormap for temperature
+temp_colormap = cm.LinearColormap(['#32CD32', 'gray', 'purple'], vmin=temp_min, vmax=temp_max)
+temp_colormap.caption = 'Avg Temperature Anomaly (°C)'
+temp_colormap.add_to(Map)
+
+# Define style function for temperature
+def temp_style(feature):
+    val = feature['properties'].get('avg_temp_anomaly')
+    color = 'gray' if val is None else temp_colormap(val)
+    return {
+        'fillOpacity': 0.7,
+        'weight': 1,
+        'color': 'black',
+        'fillColor': color
+    }
+
+# Add temp layer
+folium.GeoJson(
+    geojson,
+    name='Temperature Anomaly',
+    style_function=temp_style, 
+).add_to(Map)
+
+
+# -------------------- PRECIPITATION ANOMALY LAYER --------------------
+
+# Extract precipitation anomaly values
+precip_vals = [f['properties'].get('avg_precip_anomaly') for f in geojson['features'] if f['properties'].get('avg_precip_anomaly') is not None]
+precip_min, precip_max = min(precip_vals), max(precip_vals)
+
+# Create colormap for precipitation
+precip_colormap = cm.LinearColormap(['coral', 'gray',  '#0571b0'], vmin=precip_min, vmax=precip_max)
+precip_colormap.caption = 'Avg Precipitation Anomaly (mm)'
+precip_colormap.add_to(Map)
+
+# Define style function for precipitation
+def precip_style(feature):
+    val = feature['properties'].get('avg_precip_anomaly')
+    color = 'gray' if val is None else precip_colormap(val)
+    return {
+        'fillOpacity': 0.7,
+        'weight': 1,
+        'color': 'black',
+        'fillColor': color
+    }
+
+# Add precip layer
+folium.GeoJson(
+    geojson,
+    name='Precipitation Anomaly',
+    style_function=precip_style,
+    tooltip=folium.GeoJsonTooltip(
+    fields=['avg_temp_anomaly', 'avg_precip_anomaly'],
+    aliases=['Temp Anomaly (°C):', 'Precip Anomaly (mm):']
+)
+).add_to(Map)
+
+
+# -------------------- FINAL MAP SETUP --------------------
+
+folium.LayerControl().add_to(Map)
+Map
+```
+
+Figure 5: This map overlays average temperature and precipitation anomalies of Washington's counties showing the compounding anomalies that can impact farming. 
+ 
+
+
+## Discussion
+
+The chart visualizing temperature anomalies over time (Figure 1) shows that there were more colder than average days of spring 2024 than warmer than average days across the entire state. The map visualizing temperature anomalies (Figure 3) also suggests that overall, Washington saw a colder than average spring 2024, with the exception of the coastal and southwestern portions of the state. The aras of the state with the largest temperature anomalies were clustered in the central counties of the state, with generally colder than average temperatures. 
+
+The time series chart visualizing precipitation anomalies (Figure 2) suggests that most days saw slightly below average precipitation levels, but the few days that did experience precipitation saw much higher than average rainfall across the entire state. However, the map (Figure 4) shows that the precipitation anomalies are spatially dependent: while Western Washington experienced a wetter than average spring, the eastern side of the state saw a drier than average spring in 2024. This cautions us against aggregating data at very high scales (i.e. across the entire state), because you might miss out on spatial trends at lower scales.
+
+
+
+## Conclusion
+
+Through this module, you calculated precipitation and temperature anomalies for counties in Washington state in May and June 2024, compared to the average precipitation and temperature values for that time period over the preceding 15 years. While this module calculates anomalies for a single year, these anomalies can be combined together from multiple years to assess how variable the climate is over longer time spans. Counties where anomalies are high each year can be said to have highly variable and unpredictable weather, whereas areas with lower anomalies each year may have relatively stable climates. 
+
+These indicators of climatic variability could be used to guide further analyses of climate vulnerability in agriculture. For example, farmers could be interviewed in counties with stable vs. variable climates and assess differences in how farmers are experiencing and coping with climate change.  Climate variability could further be combined with other variables to gain a more holistic picture of vulnerability, like dependence on rainfed agriculture, availability of irrigation, and access to financial, social, and natural capital. 
+
+## In this lesson you learned...
+ 
+- That increasingly variable precipitation and temperature trends are an issue for farmers in western Washington and across the globe
+- How to calculate climatological anomalies for a single year, by:
+    - Working with Google Earth Engine
+    - Downloading county boundaries using U.S. Census TIGER data
+    - Downloading precipitation and rain data using the ERA5-Land dataset
+    - Calculating average daily precipitation and temperature data over 15 years for each county (‘normals’)
+    - Calculating anomalies for daily climate data compared to the 15-year average (‘normals’)
+    - Visualizing temperature anomalies using graphs and chloropleth maps
+
