@@ -8,7 +8,7 @@
         "title: \"NASA Acres and Climate Resilience Network\"\n",
         "author: \"Jacom Almon Orser and Dr. Michael Humber\"\n",
         "format: html\n",
-        "bibliography: m502-acres-references.bib\n",
+        "bibliography: m404-acres-references.bib\n",
         "---\n",
         "\n",
         "# Primary Learning Objectives\n",
@@ -145,7 +145,7 @@
         "\n",
         "The primary tool we are using is Python. Python is used to take large quantities of data and help users define and derive stories from that data. The installation depends on the method you are using. For Google Colab, you must install rasterio (a substantial raster library) and import the following libraries.\n"
       ],
-      "id": "90407a66"
+      "id": "df7d7de2"
     },
     {
       "cell_type": "code",
@@ -203,7 +203,7 @@
         "# Display graphical interfaces\n",
         "from IPython.display import display"
       ],
-      "id": "21c16cdb",
+      "id": "94df33c2",
       "execution_count": null,
       "outputs": []
     },
@@ -219,7 +219,7 @@
         "\n",
         "NASA Earth data requires a data pull request, this takes time to 'order', we can run this now to give the program time to gather the data we are requesting. **This code chunk is used for local downloads if you have not yet downloaded data**:\n"
       ],
-      "id": "96302fc9"
+      "id": "d8e7d85f"
     },
     {
       "cell_type": "code",
@@ -236,7 +236,7 @@
         "## If you wish to use another county, download, and path to the other county geojson file\n",
         "county_path = 'data/Talbot_County.geojson' # Path to county"
       ],
-      "id": "c8f30a07",
+      "id": "a127c9dc",
       "execution_count": null,
       "outputs": []
     },
@@ -255,7 +255,7 @@
         "## If you wish to use another county, download, and path to the other county geojson file\n",
         "county_path = 'data/Talbot_County.geojson' # Path to county"
       ],
-      "id": "da0951b8",
+      "id": "1967e9eb",
       "execution_count": null,
       "outputs": []
     },
@@ -270,7 +270,7 @@
         "\n",
         "year = 2018 # Year of interest"
       ],
-      "id": "62f2a9c0",
+      "id": "2fef61cc",
       "execution_count": null,
       "outputs": []
     },
@@ -282,7 +282,7 @@
         "\n",
         "Accessing data directly from the NASA Earthdata Cloud APPEEARS website requires to make a request with your Earthdata Username and Password. This request generates a **token**:"
       ],
-      "id": "14dfd4b1"
+      "id": "b077cf7f"
     },
     {
       "cell_type": "code",
@@ -291,7 +291,7 @@
         "# Get the token from your Earth Data account\n",
         "token = requests.post('https://appeears.earthdatacloud.nasa.gov/api/login',auth=(USERNAME, PASSWORD)).json()['token']"
       ],
-      "id": "e9d8b623",
+      "id": "9cd160cd",
       "execution_count": null,
       "outputs": []
     },
@@ -301,7 +301,7 @@
       "source": [
         "With the token, you can create an APPEEARS task that requests a data package. An email is sent to you with confirmation and updates on your request.  NOTE: This requrest may take a few hours to be filled.\n"
       ],
-      "id": "330f8d4d"
+      "id": "bbc6b230"
     },
     {
       "cell_type": "code",
@@ -328,7 +328,7 @@
         "\n",
         "# task_id = requests.post('https://appeears.earthdatacloud.nasa.gov/api/task',json=task,headers={'Authorization': f'Bearer {token}'}).json()"
       ],
-      "id": "820e190c",
+      "id": "9a4cfa06",
       "execution_count": null,
       "outputs": []
     },
@@ -338,7 +338,7 @@
       "source": [
         "You should receive an email from APPEEARS that says the task has started. \n"
       ],
-      "id": "2828f62e"
+      "id": "4a65bc9c"
     },
     {
       "cell_type": "code",
@@ -352,7 +352,7 @@
         "task_id['task_id'] = 'f7f2bc1b-46bc-4d5d-9421-74e165b576ed'\n",
         "task_id['status'] = 'done'"
       ],
-      "id": "c3a0fdba",
+      "id": "3adc856f",
       "execution_count": null,
       "outputs": []
     },
@@ -366,7 +366,7 @@
         "\n",
         "There are two ways to display information: vectors (points, lines, polygons) or rasters. Rasters are continuous sheets that are layered across a space; they are made up of pixels. Each pixel represents the ground beneath it. For example, if a raster pixel is 30 by 30 meters, that means a single pixel represents 30 by 30 meters on the ground.\n"
       ],
-      "id": "b9be7b18"
+      "id": "57e64284"
     },
     {
       "cell_type": "code",
@@ -387,7 +387,7 @@
         "cdl_meta = cdl_data.meta\n",
         "data = cdl_data.read(1)"
       ],
-      "id": "4b7414ee",
+      "id": "f0f8ffd1",
       "execution_count": null,
       "outputs": []
     },
@@ -398,7 +398,7 @@
         "### Displaying Raster Data\n",
         "MISSING TEXT\n"
       ],
-      "id": "7192f776"
+      "id": "fc0d7d6e"
     },
     {
       "cell_type": "code",
@@ -427,7 +427,7 @@
         "folium.LayerControl().add_to(m)\n",
         "display(m)"
       ],
-      "id": "04083e66",
+      "id": "4b0d67ca",
       "execution_count": null,
       "outputs": []
     },
@@ -445,7 +445,7 @@
         "\n",
         "![](images/nearest_neighbor.png)\n"
       ],
-      "id": "749620b6"
+      "id": "f5371f45"
     },
     {
       "cell_type": "code",
@@ -495,7 +495,7 @@
         "    # Return both the reprojected data and the updated metadata\n",
         "    return dst_data, dst_kwargs"
       ],
-      "id": "3e714234",
+      "id": "29dc2ed8",
       "execution_count": null,
       "outputs": []
     },
@@ -511,7 +511,7 @@
         "\n",
         "This view provides insight into the common commodities that are grown in Maryland in the desired year.\n"
       ],
-      "id": "63334a79"
+      "id": "cf8f00a3"
     },
     {
       "cell_type": "code",
@@ -519,7 +519,7 @@
       "source": [
         "cdl_reprojected, cdl_meta_reprojected = reproject_raster(cdl_data, cdl_meta['crs'], cdl_meta['transform'], 'EPSG:4326')"
       ],
-      "id": "c72fbe5c",
+      "id": "2974b268",
       "execution_count": null,
       "outputs": []
     },
@@ -531,7 +531,7 @@
         "\n",
         "Amazon AWS S3 Bucket - Cloud Access to the data:"
       ],
-      "id": "e428a5a6"
+      "id": "23dc68a7"
     },
     {
       "cell_type": "code",
@@ -556,7 +556,7 @@
         "        'EPSG:4326'\n",
         "    )"
       ],
-      "id": "27861257",
+      "id": "76eb9555",
       "execution_count": null,
       "outputs": []
     },
@@ -566,7 +566,7 @@
       "source": [
         "If you've downloaded the data locally:"
       ],
-      "id": "a4cd628c"
+      "id": "1ed5487e"
     },
     {
       "cell_type": "code",
@@ -587,7 +587,7 @@
         "#         slr_meta['transform'],\n",
         "#         'EPSG:4326')"
       ],
-      "id": "7541db8b",
+      "id": "86a00203",
       "execution_count": null,
       "outputs": []
     },
@@ -599,7 +599,7 @@
         "\n",
         "You should have received an email from APPEEARS letting you know your task has completed. If you have not received this, go to the APPEEARS website to view the progress by clicking on the explore tab and viewing the TALBOT_COUNTY request.\n"
       ],
-      "id": "d9660a1e"
+      "id": "681b3219"
     },
     {
       "cell_type": "code",
@@ -615,7 +615,7 @@
         "              target_date = start_date + timedelta(days=day_of_year - 1) # add the DOY of acquisition to the year\n",
         "              return target_date.strftime('%m-%d-%Y') ## return proper formatting"
       ],
-      "id": "90117e25",
+      "id": "54605abd",
       "execution_count": null,
       "outputs": []
     },
@@ -625,7 +625,7 @@
       "source": [
         "The token and Task ID created previously for APPEEARS can be used here to create a 'bundle' which carries multiple datasets from APPEEARS"
       ],
-      "id": "cf87cfd2"
+      "id": "a7f60f8d"
     },
     {
       "cell_type": "code",
@@ -635,7 +635,7 @@
         "QA_data = {}\n",
         "data = {} # Create an empty dictionary to collect the data from appeears"
       ],
-      "id": "0966d979",
+      "id": "6a336076",
       "execution_count": null,
       "outputs": []
     },
@@ -703,7 +703,7 @@
         "    else:\n",
         "      continue\n"
       ],
-      "id": "07726d80",
+      "id": "d790b8f6",
       "execution_count": null,
       "outputs": []
     },
@@ -713,7 +713,7 @@
       "source": [
         "Extract some of the data into variables"
       ],
-      "id": "c86f240d"
+      "id": "5e8f8fd7"
     },
     {
       "cell_type": "code",
@@ -733,7 +733,7 @@
         "ndvi = (nir - red) / denominator  # Compute NDVI safely\n",
         "ndvi = np.nan_to_num(ndvi, nan=0)\n"
       ],
-      "id": "031215d1",
+      "id": "634a02b9",
       "execution_count": null,
       "outputs": []
     },
@@ -745,7 +745,7 @@
         "\n",
         "![](images/PixelQA.png)\n"
       ],
-      "id": "e680f1b5"
+      "id": "3029c260"
     },
     {
       "cell_type": "code",
@@ -754,7 +754,7 @@
         "qa_flags_to_mask = [21824, 21890, 21952, 22018, 22146, 22208] ## These are the values that indicate the higher quality of pixel\n",
         "masked_ndvi = np.where(np.isin(qa_flags, qa_flags_to_mask), np.nan, ndvi) # filter the NDVI array"
       ],
-      "id": "ee418ef2",
+      "id": "447df2fa",
       "execution_count": null,
       "outputs": []
     },
@@ -805,7 +805,7 @@
         "print(\"Original SLR shape:\", slr_reprojected.shape)\n",
         "print(\"Resampled SLR shape:\", slr_resampled.shape)"
       ],
-      "id": "02b03b78",
+      "id": "e566dde3",
       "execution_count": null,
       "outputs": []
     },
@@ -815,7 +815,7 @@
       "source": [
         "This code places both rasters on the same map. We first select only corn (where the CDL value is equal to 1). Look on the CDL website if you are interested in other land classes.\n"
       ],
-      "id": "3b47a8fc"
+      "id": "11cd0250"
     },
     {
       "cell_type": "code",
@@ -833,7 +833,7 @@
         "plt.tight_layout()\n",
         "plt.show()"
       ],
-      "id": "a117f530",
+      "id": "e7561c16",
       "execution_count": null,
       "outputs": []
     },
@@ -858,7 +858,7 @@
         "corn_area_acres = np.sum(corn_mask) * pixel_area_acres\n",
         "print(f\"Total acres of corn: {corn_area_acres:.2f}\")"
       ],
-      "id": "92a8d739",
+      "id": "a3c83352",
       "execution_count": null,
       "outputs": []
     },
@@ -870,7 +870,7 @@
         "\n",
         "#### Graphically view the changes in NDVI.\n"
       ],
-      "id": "638d0a71"
+      "id": "c469b6f9"
     },
     {
       "cell_type": "code",
@@ -887,7 +887,7 @@
         "masked_ndvi_below_water = np.where(corn_below_water_mask, masked_ndvi, np.nan)\n",
         "masked_ndvi_above_water = np.where(corn_above_water_mask, masked_ndvi, np.nan)"
       ],
-      "id": "8565afa0",
+      "id": "3c2b64d0",
       "execution_count": null,
       "outputs": []
     },
@@ -956,7 +956,7 @@
         "    for stat in ['mean', 'max']:\n",
         "        print(f\"{stat.capitalize()} NDVI: {ndvi_analysis[condition][stat]}\")"
       ],
-      "id": "e914cd85",
+      "id": "93ff4362",
       "execution_count": null,
       "outputs": []
     },
@@ -968,7 +968,7 @@
         "\n",
         "We can see that the corn predicted to be below water in 2050 is already showing signs of decreased NDVI values. As the sea level continues to rise and salinization impacts farmers, what are the future conditions for corn growing in Maryland? What are the estimated impacts? What can we do?\n"
       ],
-      "id": "38cf8090"
+      "id": "7b64f2f8"
     },
     {
       "cell_type": "code",
@@ -1007,7 +1007,7 @@
         "print(\"2. Understanding climate change impacts on crop productivity\")\n",
         "print(\"3. Developing adaptive strategies for coastal agricultural communities\")"
       ],
-      "id": "0d6003c2",
+      "id": "b40b6aef",
       "execution_count": null,
       "outputs": []
     },
@@ -1031,7 +1031,7 @@
         "\n",
         "If you want to download the tifs you created, you can do so here.\n"
       ],
-      "id": "3c62f2b0"
+      "id": "b86815e1"
     },
     {
       "cell_type": "code",
@@ -1060,7 +1060,7 @@
         "\n",
         "print(f\"Masked SLR saved to: {SLR_output_tif_path}\")"
       ],
-      "id": "2deec56e",
+      "id": "06054b1a",
       "execution_count": null,
       "outputs": []
     },
@@ -1091,7 +1091,7 @@
         "\n",
         "print(f\"Masked SLR saved to: {corn_maskoutput_tif_path}\")"
       ],
-      "id": "d9693094",
+      "id": "d95a68d7",
       "execution_count": null,
       "outputs": []
     }

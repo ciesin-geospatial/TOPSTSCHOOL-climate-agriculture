@@ -35,6 +35,8 @@ Teaching earth science topics and coding skills in depth is beyond the scope of 
 -   **NASA ACRES Climate Resilience Network:** This lesson will use public research data for derived conclusions and to view the impacts climate change has on agriculture.
     -   [Lesson 4: NASA ACRES Climate Resilience Network](https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m404-nasa-acres-climate-resilience-network.html)
 
+-  **Weird Weather In Washington State**: This lesson will use Python to analyze temperature and precipitation anomalies in Washington State and their impacts on agriculture and people.
+    -   [Lesson 5: Weird Weather In Washington State](https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m405-weird-weather.html)
  
 
 ::: {style="text-align: right;"}
