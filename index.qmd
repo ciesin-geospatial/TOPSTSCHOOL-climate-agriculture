@@ -27,6 +27,9 @@ Teaching earth science topics and coding skills in depth is beyond the scope of 
 -   **Understanding Human Exposure to Heat:** This lesson will use Google Earth Engine to analyze temperature and social vulnerability data.
     -   [Lesson 1: Understanding Human Exposure to Heat](https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m401-human-exposure-heat.html)
 
+- **Long Term Climatologies Featuring nClimGrid-Daily Data** This lesson will explore long-term climate patterns and detect climate change signals through visualization techniques and time series analysis using operational climate monitoring data from NOAA’s nClimGrid-Daily dataset. 
+   -   [Lesson 2: Long Term Climatologies Featuring nClimGrid-Daily Data](https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m402-nclimgrid.html)
+
 
 -   **Flash Drought Multi-Indicator Analysis:** This lesson will use R and open source R packages to work with multiple drought indicators to understand rapid drought intensification and its agricultural impacts.
     -   [Lesson 3: Flash Drought Multi-Indicator Analysis](https://ciesin-geospatial.github.io/TOPSTSCHOOL-climate-agriculture/m403-flash-drought-ag.html)
